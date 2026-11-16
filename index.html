@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MotorNest | Used cars from trusted Sheffield dealers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0e1a2b;--ink2:#1b2c44;--mut:#62708a;--line:#e3e7ee;--bg:#f5f6f8;--card:#fff;--acc:#f5a524;--acc2:#d98a06;--ok:#0e9f6e;--bad:#d64545;--r:14px}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.45;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+header.top{background:var(--ink);color:#fff;position:sticky;top:0;z-index:20}
+header.top .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
+.logo{font-weight:800;font-size:22px;letter-spacing:-.5px;text-decoration:none;display:flex;align-items:center;gap:8px}
+.logo span{color:var(--acc)}
+.logo svg{width:28px;height:28px}
+nav{display:flex;align-items:center;white-space:nowrap}
+nav a{color:#d5dcea;text-decoration:none;font-weight:600;font-size:14px;margin-left:16px}
+@media(max-width:560px){.logo{font-size:19px}.logo svg{width:24px;height:24px}nav a{font-size:13px;margin-left:11px}nav a.hm{display:none}}
+nav a:hover{color:#fff}
+.hero{background:linear-gradient(160deg,var(--ink) 0%,var(--ink2) 70%,#27405f 100%);color:#fff;padding:34px 0 70px}
+.hero h1{font-size:clamp(26px,5vw,44px);margin:0 0 6px;letter-spacing:-1px;font-weight:800}
+.hero h1 em{font-style:normal;color:var(--acc)}
+.hero p{margin:0;color:#c3cde0;font-size:16px}
+.panel{background:var(--card);border-radius:var(--r);box-shadow:0 8px 30px rgba(14,26,43,.10);padding:16px}
+.search{margin-top:-46px;position:relative}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(2,1fr)}
+@media(min-width:760px){.grid{grid-template-columns:repeat(4,1fr)}.grid.g3{grid-template-columns:repeat(3,1fr)}}
+label{display:block;font-size:12px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:15px;background:#fff;color:var(--ink)}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--acc);outline-offset:1px;border-color:transparent}
+textarea{min-height:110px;resize:vertical}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:10px;padding:11px 18px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;background:var(--acc);color:#1b1200;text-decoration:none}
+.btn:hover{background:var(--acc2)}
+.btn.dark{background:var(--ink);color:#fff}.btn.dark:hover{background:var(--ink2)}
+.btn.ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}.btn.ghost:hover{background:#f0f2f6}
+.btn.sm{padding:7px 11px;font-size:13px;border-radius:8px}
+.btn.danger{background:#fff;border:1px solid #f0c4c4;color:var(--bad)}
+.btn[disabled]{opacity:.55;cursor:wait}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:22px 0 12px}
+.bar h2{margin:0;font-size:20px;letter-spacing:-.3px}
+.cards{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:620px){.cards{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:960px){.cards{grid-template-columns:repeat(3,1fr)}}
+.car{background:var(--card);border-radius:var(--r);overflow:hidden;text-decoration:none;display:flex;flex-direction:column;box-shadow:0 2px 10px rgba(14,26,43,.06);transition:transform .15s,box-shadow .15s}
+.car:hover{transform:translateY(-3px);box-shadow:0 10px 26px rgba(14,26,43,.13)}
+.ph{aspect-ratio:4/3;background:linear-gradient(135deg,#dfe5ee,#c9d2e0);display:flex;align-items:center;justify-content:center;color:#7d8aa3;font-weight:600;font-size:13px;overflow:hidden}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.car .b{padding:14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.car h3{margin:0;font-size:17px;letter-spacing:-.2px}
+.car .v{color:var(--mut);font-size:13px;margin-top:-4px}
+.price{font-size:22px;font-weight:800;letter-spacing:-.5px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:#eef1f6;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;color:#3b4a63}
+.loc{margin-top:auto;padding-top:8px;border-top:1px solid var(--line);font-size:13px;color:var(--mut)}
+.detail{display:grid;gap:18px;grid-template-columns:1fr;margin-top:18px}
+@media(min-width:900px){.detail{grid-template-columns:1.5fr 1fr}}
+.gal .main{border-radius:var(--r);overflow:hidden}
+.thumbs{display:flex;gap:8px;overflow-x:auto;margin-top:8px;padding-bottom:4px}
+.thumbs img{width:86px;height:64px;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid transparent;flex:none}
+.thumbs img.on{border-color:var(--acc)}
+.spec{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0}
+@media(min-width:620px){.spec{grid-template-columns:repeat(3,1fr)}}
+.spec div{background:#f3f5f9;border-radius:10px;padding:10px 12px}
+.spec small{display:block;color:var(--mut);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.spec b{font-size:15px}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin:14px 0}
+.tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font:inherit;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap;color:var(--ink)}
+.tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.row{display:flex;gap:12px;align-items:center;background:#fff;border-radius:12px;padding:10px;margin-bottom:8px;box-shadow:0 1px 5px rgba(14,26,43,.05);flex-wrap:wrap}
+.row .ph{width:92px;aspect-ratio:4/3;border-radius:8px;flex:none;font-size:10px}
+.row .info{flex:1;min-width:160px}
+.row .info b{display:block}
+.row .info small{color:var(--mut)}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.badge{display:inline-block;border-radius:999px;padding:2px 9px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px}
+.badge.live,.badge.approved{background:#dff5ec;color:#08714e}
+.badge.sold,.badge.suspended{background:#fde4e4;color:#a52a2a}
+.badge.draft,.badge.pending,.badge.new{background:#fff1d6;color:#8a5a00}
+.badge.contacted{background:#e1ecff;color:#1f4fa3}.badge.closed{background:#eceff4;color:#4b5873}
+.note{background:#fff7e3;border:1px solid #f4dca0;border-radius:10px;padding:10px 12px;font-size:14px;margin:10px 0}
+.err{color:var(--bad);font-size:14px;font-weight:600;margin-top:8px}
+.muted{color:var(--mut)}
+.center{text-align:center;padding:50px 10px;color:var(--mut)}
+.narrow{max-width:460px;margin:30px auto}
+.pgrid{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.pgrid .p{position:relative}
+.pgrid img{width:96px;height:72px;object-fit:cover;border-radius:8px;display:block}
+.pgrid button{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:0;background:var(--bad);color:#fff;font-weight:800;cursor:pointer;line-height:1}
+footer{margin-top:50px;background:var(--ink);color:#aeb9cd;padding:22px 0;font-size:13px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:10px;font-weight:600;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;max-width:90vw}
+#toast.on{opacity:1}
+pre.code{background:#0e1a2b;color:#d8e2f3;padding:12px;border-radius:10px;overflow:auto;font-size:12px}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="#/"><svg viewBox="0 0 32 32" fill="none"><path d="M4 18c0-7 5-12 12-12s12 5 12 12" stroke="#f5a524" stroke-width="3" stroke-linecap="round"/><path d="M7 21h18l-2 5H9l-2-5z" fill="#f5a524"/><circle cx="16" cy="15" r="3" fill="#fff"/></svg>Motor<span>Nest</span></a>
+  <nav id="nav"></nav>
+</div></header>
+<main id="app"><div class="center">Loading MotorNest…</div></main>
+<footer><div class="wrap">MotorNest · Used cars from independent dealers in and around Sheffield · <a href="#/join">Dealers: list your stock</a> · <a href="#/portal">Dealer portal</a></div></footer>
+<div id="toast"></div>
+
+<script>
+const SB_URL = 'https://ixagimjtfkldxzmmtqfj.supabase.co';
+const SB_KEY = 'sb_publishable_pi0CK3HTSJmcrSg_EAG6ag_n6LwGHp5';
+const sb = supabase.createClient(SB_URL, SB_KEY);
+const SHEFFIELD = { lat: 53.3811, lng: -1.4701, label: 'Sheffield' };
+const FUELS = ['Petrol', 'Diesel', 'Hybrid', 'Plug-in Hybrid', 'Electric'];
+const BODIES = ['Hatchback', 'Saloon', 'Estate', 'SUV', 'Coupe', 'Convertible', 'MPV', 'Van', 'Pickup'];
+const CAR_FIELDS = [
+  ['make', 'Make', 'text', 1], ['model', 'Model', 'text', 1], ['variant', 'Variant / trim', 'text'],
+  ['year', 'Year', 'number'], ['price', 'Price (£)', 'number', 1], ['mileage', 'Mileage', 'number'],
+  ['fuel', 'Fuel', 'select', 0, FUELS], ['gearbox', 'Gearbox', 'select', 0, ['Manual', 'Automatic']],
+  ['body_type', 'Body type', 'select', 0, BODIES], ['colour', 'Colour', 'text'],
+  ['engine_cc', 'Engine (cc)', 'number'], ['doors', 'Doors', 'number'], ['seats', 'Seats', 'number'],
+  ['owners', 'Previous owners', 'number'], ['mot_expiry', 'MOT expiry', 'date']
+];
+const INT_FIELDS = ['year', 'price', 'mileage', 'engine_cc', 'doors', 'seats', 'owners'];
+const S = { user: null, isAdmin: false, myDealers: [], dealer: null, managing: false, cars: null, origin: SHEFFIELD, f: {}, tab: 'stock', atab: 'apps' };
+
+// ---------- helpers ----------
+const $ = (s, r) => (r || document).querySelector(s);
+const app = () => $('#app');
+const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const money = n => '£' + Number(n || 0).toLocaleString('en-GB');
+const num = n => Number(n || 0).toLocaleString('en-GB');
+const photoUrl = p => /^https:\/\//i.test(p) ? String(p) : SB_URL + '/storage/v1/object/public/car-photos/' + String(p).split('/').map(encodeURIComponent).join('/');
+const title = c => [c.year, c.make, c.model].filter(Boolean).join(' ');
+const tcase = s => String(s || '').toLowerCase().replace(/\b[a-z]/g, m => m.toUpperCase());
+const slugify = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 70) || 'dealer';
+let toastT;
+function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 3200); }
+function fail(e) { console.error(e); toast((e && e.message) || 'Something went wrong'); }
+function miles(a, b) {
+  if (!a || !b || a.lat == null || b.lat == null) return null;
+  const R = 3958.8, r = x => x * Math.PI / 180, dLa = r(b.lat - a.lat), dLo = r(b.lng - a.lng);
+  const h = Math.sin(dLa / 2) ** 2 + Math.cos(r(a.lat)) * Math.cos(r(b.lat)) * Math.sin(dLo / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+async function geocode(pc) {
+  try {
+    const r = await fetch('https://api.postcodes.io/postcodes/' + encodeURIComponent(String(pc).trim()));
+    const j = await r.json();
+    if (j.status === 200 && j.result) return { lat: j.result.latitude, lng: j.result.longitude };
+  } catch (e) { }
+  return null;
+}
+function img(c, cls) {
+  const p = c.photos && c.photos[0];
+  return '<div class="ph ' + (cls || '') + '">' + (p ? '<img loading="lazy" alt="" src="' + esc(photoUrl(p.path)) + '">' : 'Photo coming soon') + '</div>';
+}
+function nav() {
+  let h = '<a class="hm" href="#/">Find a car</a>';
+  if (!S.user) h += '<a href="#/join">List your stock</a>';
+  if (S.isAdmin) h += '<a href="#/admin">Admin</a>';
+  h += '<a href="#/portal">' + (S.user ? 'My portal' : 'Dealer login') + '</a>';
+  if (S.user) h += '<a href="#" onclick="signOut();return false">Sign out</a>';
+  $('#nav').innerHTML = h;
+}
+
+// ---------- public data ----------
+async function loadCars(force) {
+  if (S.cars && !force) return S.cars;
+  const { data, error } = await sb.from('cars')
+    .select('id,reg,make,model,variant,year,price,mileage,fuel,gearbox,body_type,colour,engine_cc,doors,seats,owners,mot_expiry,description,created_at,dealer_id,dealer:dealers!cars_dealer_id_fkey(id,name,slug,town,postcode,lat,lng,phone,email,status),photos:car_photos!car_photos_car_id_fkey(path,sort_order)')
+    .eq('status', 'live').order('created_at', { ascending: false }).limit(1000);
+  if (error) throw error;
+  S.cars = data.filter(c => c.dealer && c.dealer.status === 'approved');
+  S.cars.forEach(c => c.photos.sort((a, b) => a.sort_order - b.sort_order));
+  setDistances();
+  return S.cars;
+}
+function setDistances() { (S.cars || []).forEach(c => c.dist = miles(S.origin, c.dealer)); }
+function cardHtml(c) {
+  return '<a class="car" href="#/car/' + c.id + '">' + img(c) + '<div class="b"><h3>' + esc(title(c)) + '</h3>' +
+    (c.variant ? '<div class="v">' + esc(c.variant) + '</div>' : '') +
+    '<div class="price">' + money(c.price) + '</div><div class="chips">' +
+    (c.mileage != null ? '<span class="chip">' + num(c.mileage) + ' miles</span>' : '') +
+    (c.fuel ? '<span class="chip">' + esc(c.fuel) + '</span>' : '') +
+    (c.gearbox ? '<span class="chip">' + esc(c.gearbox) + '</span>' : '') +
+    '</div><div class="loc">' + esc(c.dealer.name) + (c.dealer.town ? ' · ' + esc(c.dealer.town) : '') +
+    (c.dist != null ? ' · ' + c.dist.toFixed(c.dist < 10 ? 1 : 0) + ' mi' : '') + '</div></div></a>';
+}
+
+// ---------- customer site ----------
+function opts(list, sel, any) { return '<option value="">' + any + '</option>' + list.map(v => '<option' + (String(v) === String(sel) ? ' selected' : '') + '>' + esc(v) + '</option>').join(''); }
+function priceOpts(sel, any) { return '<option value="">' + any + '</option>' + [2000, 3000, 4000, 5000, 7500, 10000, 12500, 15000, 20000, 25000, 30000, 40000, 50000].map(v => '<option value="' + v + '"' + (String(v) === String(sel) ? ' selected' : '') + '>' + money(v) + '</option>').join(''); }
+async function viewHome() {
+  app().innerHTML = '<section class="hero"><div class="wrap"><h1>Find your next car, <em>close to home</em></h1><p>Quality used cars from independent dealers in and around Sheffield.</p></div></section><div class="wrap"><div class="panel search" id="search"></div><div id="results"><div class="center">Loading cars…</div></div></div>';
+  try { await loadCars(); } catch (e) { $('#results').innerHTML = '<div class="center">Could not load cars. ' + esc(e.message) + '</div>'; return; }
+  const f = S.f, makes = [...new Set(S.cars.map(c => c.make))].sort();
+  $('#search').innerHTML = '<div class="grid">' +
+    '<div><label>Make</label><select onchange="setF(\'make\',this.value,1)">' + opts(makes, f.make, 'Any make') + '</select></div>' +
+    '<div><label>Model</label><select id="fmodel" onchange="setF(\'model\',this.value)"></select></div>' +
+    '<div><label>Min price</label><select onchange="setF(\'pmin\',this.value)">' + priceOpts(f.pmin, 'No min') + '</select></div>' +
+    '<div><label>Max price</label><select onchange="setF(\'pmax\',this.value)">' + priceOpts(f.pmax, 'No max') + '</select></div>' +
+    '<div><label>Max mileage</label><select onchange="setF(\'miles\',this.value)"><option value="">Any mileage</option>' + [10000, 20000, 30000, 40000, 50000, 60000, 80000, 100000, 150000].map(v => '<option value="' + v + '"' + (String(v) === String(f.miles) ? ' selected' : '') + '>Up to ' + num(v) + '</option>').join('') + '</select></div>' +
+    '<div><label>Fuel</label><select onchange="setF(\'fuel\',this.value)">' + opts(FUELS, f.fuel, 'Any fuel') + '</select></div>' +
+    '<div><label>Gearbox</label><select onchange="setF(\'gear\',this.value)">' + opts(['Manual', 'Automatic'], f.gear, 'Any gearbox') + '</select></div>' +
+    '<div><label>Distance</label><select onchange="setF(\'dist\',this.value)"><option value="">Any distance</option>' + [5, 10, 20, 30, 50, 100].map(v => '<option value="' + v + '"' + (String(v) === String(f.dist) ? ' selected' : '') + '>Within ' + v + ' miles</option>').join('') + '</select></div>' +
+    '<div><label>From postcode</label><input id="fpc" placeholder="Sheffield (default)" value="' + esc(S.origin === SHEFFIELD ? '' : S.origin.label) + '" onchange="setOrigin(this.value)"></div>' +
+    '<div><label>Sort by</label><select onchange="setF(\'sort\',this.value)">' + [['new', 'Newest listed'], ['plo', 'Price: low to high'], ['phi', 'Price: high to low'], ['mil', 'Lowest mileage'], ['near', 'Nearest first']].map(o => '<option value="' + o[0] + '"' + (f.sort === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></div>' +
+    '</div>';
+  fillModels(); renderResults();
+}
+function fillModels() {
+  const el = $('#fmodel'); if (!el) return;
+  const models = [...new Set(S.cars.filter(c => !S.f.make || c.make === S.f.make).map(c => c.model))].sort();
+  el.innerHTML = opts(models, S.f.model, 'Any model'); el.disabled = !S.f.make;
+}
+function setF(k, v, resetModel) { S.f[k] = v; if (resetModel) { S.f.model = ''; fillModels(); } renderResults(); }
+async function setOrigin(v) {
+  v = v.trim();
+  if (!v) S.origin = SHEFFIELD;
+  else { const g = await geocode(v); if (!g) { toast('Postcode not found, using Sheffield'); S.origin = SHEFFIELD; } else S.origin = { lat: g.lat, lng: g.lng, label: v.toUpperCase() }; }
+  setDistances(); renderResults();
+}
+function renderResults() {
+  const f = S.f; let list = S.cars.filter(c =>
+    (!f.make || c.make === f.make) && (!f.model || c.model === f.model) &&
+    (!f.pmin || c.price >= +f.pmin) && (!f.pmax || c.price <= +f.pmax) &&
+    (!f.miles || (c.mileage != null && c.mileage <= +f.miles)) &&
+    (!f.fuel || c.fuel === f.fuel) && (!f.gear || c.gearbox === f.gear) &&
+    (!f.dist || (c.dist != null && c.dist <= +f.dist)));
+  const s = f.sort || 'new';
+  if (s === 'plo') list.sort((a, b) => a.price - b.price);
+  if (s === 'phi') list.sort((a, b) => b.price - a.price);
+  if (s === 'mil') list.sort((a, b) => (a.mileage ?? 9e9) - (b.mileage ?? 9e9));
+  if (s === 'near') list.sort((a, b) => (a.dist ?? 9e9) - (b.dist ?? 9e9));
+  if (s === 'new') list.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+  $('#results').innerHTML = '<div class="bar"><h2>' + list.length + ' car' + (list.length === 1 ? '' : 's') + ' found</h2><span class="muted">Distances from ' + esc(S.origin.label) + '</span></div>' +
+    (list.length ? '<div class="cards">' + list.map(cardHtml).join('') + '</div>' : '<div class="center">No cars match those filters yet. Try widening your search.</div>');
+}
+
+async function viewCar(id) {
+  app().innerHTML = '<div class="wrap"><div class="center">Loading…</div></div>';
+  try { await loadCars(); } catch (e) { return fail(e); }
+  const c = S.cars.find(x => x.id === id);
+  if (!c) { app().innerHTML = '<div class="wrap"><div class="center">Sorry, this car is no longer available.<br><br><a class="btn" href="#/">Browse all cars</a></div></div>'; return; }
+  const d = c.dealer, sp = (l, v) => v == null || v === '' ? '' : '<div><small>' + l + '</small><b>' + esc(v) + '</b></div>';
+  app().innerHTML = '<div class="wrap"><p style="margin:16px 0 0"><a href="#/" class="muted">‹ Back to search</a></p><div class="detail"><div>' +
+    '<div class="gal"><div class="main" id="gmain">' + img(c) + '</div>' +
+    (c.photos.length > 1 ? '<div class="thumbs">' + c.photos.map((p, i) => '<img alt="" class="' + (i ? '' : 'on') + '" src="' + esc(photoUrl(p.path)) + '" onclick="showPhoto(this)">').join('') + '</div>' : '') + '</div>' +
+    '<div class="panel" style="margin-top:14px"><h1 style="margin:0;font-size:26px;letter-spacing:-.5px">' + esc(title(c)) + '</h1>' +
+    (c.variant ? '<div class="muted">' + esc(c.variant) + '</div>' : '') + '<div class="price" style="font-size:30px;margin-top:6px">' + money(c.price) + '</div>' +
+    '<div class="spec">' + sp('Mileage', c.mileage != null ? num(c.mileage) + ' miles' : null) + sp('Year', c.year) + sp('Fuel', c.fuel) + sp('Gearbox', c.gearbox) + sp('Body', c.body_type) + sp('Colour', c.colour) +
+    sp('Engine', c.engine_cc ? (c.engine_cc / 1000).toFixed(1) + 'L' : null) + sp('Doors', c.doors) + sp('Seats', c.seats) + sp('Owners', c.owners) +
+    sp('MOT until', c.mot_expiry ? new Date(c.mot_expiry).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }) : null) + sp('Reg', c.reg) + '</div>' +
+    (c.description ? '<h3 style="margin:8px 0 4px">About this car</h3><p style="white-space:pre-wrap;margin:0">' + esc(c.description) + '</p>' : '') + '</div></div>' +
+    '<div><div class="panel"><div class="muted" style="font-size:12px;font-weight:700;text-transform:uppercase">Sold by</div><h3 style="margin:2px 0"><a href="#/dealer/' + esc(d.slug) + '">' + esc(d.name) + '</a></h3>' +
+    '<div class="muted">' + esc([d.town, d.postcode].filter(Boolean).join(', ')) + (c.dist != null ? ' · ' + c.dist.toFixed(1) + ' miles from ' + esc(S.origin.label) : '') + '</div>' +
+    (d.phone ? '<a class="btn dark" style="width:100%;margin-top:12px" href="tel:' + esc(String(d.phone).replace(/[^0-9+]/g, '')) + '">Call ' + esc(d.phone) + '</a>' : '') + '</div>' +
+    '<form class="panel" style="margin-top:14px" onsubmit="return sendEnquiry(event,\'' + c.id + '\')"><h3 style="margin:0 0 10px">Enquire about this car</h3>' +
+    '<label>Your name</label><input name="name" required maxlength="120"><div style="height:8px"></div>' +
+    '<label>Phone</label><input name="phone" type="tel" maxlength="40"><div style="height:8px"></div>' +
+    '<label>Email</label><input name="email" type="email" maxlength="200"><div style="height:8px"></div>' +
+    '<label>Message</label><textarea name="message" maxlength="2000">Hi, is this ' + esc(title(c)) + ' still available?</textarea>' +
+    '<button class="btn" style="width:100%;margin-top:10px">Send enquiry</button><div class="err" id="enqerr"></div></form></div></div></div>';
+  window.scrollTo(0, 0);
+}
+function showPhoto(el) { $('#gmain').innerHTML = '<div class="ph"><img alt="" src="' + el.src + '"></div>'; el.parentNode.querySelectorAll('img').forEach(i => i.classList.toggle('on', i === el)); }
+async function sendEnquiry(e, id) {
+  e.preventDefault(); const fm = e.target, c = S.cars.find(x => x.id === id), b = $('button', fm);
+  const v = k => fm[k].value.trim() || null;
+  if (!v('phone') && !v('email')) { $('#enqerr').textContent = 'Please add a phone number or email so the dealer can reply.'; return false; }
+  b.disabled = true;
+  const { error } = await sb.from('enquiries').insert({ car_id: c.id, dealer_id: c.dealer_id, name: v('name'), phone: v('phone'), email: v('email'), message: v('message') });
+  b.disabled = false;
+  if (error) { $('#enqerr').textContent = 'Could not send: ' + error.message; return false; }
+  fm.innerHTML = '<h3 style="margin:0 0 6px">Enquiry sent ✓</h3><p class="muted" style="margin:0">' + esc(c.dealer.name) + ' has your details and will be in touch.</p>';
+  return false;
+}
+async function viewDealer(slug) {
+  app().innerHTML = '<div class="wrap"><div class="center">Loading…</div></div>';
+  try { await loadCars(); } catch (e) { return fail(e); }
+  const { data: d } = await sb.from('dealers').select('*').eq('slug', slug).eq('status', 'approved').maybeSingle();
+  if (!d) { app().innerHTML = '<div class="wrap"><div class="center">Dealer not found.</div></div>'; return; }
+  const list = S.cars.filter(c => c.dealer_id === d.id);
+  app().innerHTML = '<div class="wrap"><div class="panel" style="margin-top:18px"><h1 style="margin:0;letter-spacing:-.5px">' + esc(d.name) + '</h1><div class="muted">' + esc([d.address, d.town, d.postcode].filter(Boolean).join(', ')) + '</div>' +
+    (d.about ? '<p style="white-space:pre-wrap">' + esc(d.about) + '</p>' : '') +
+    '<div class="acts" style="margin-top:10px">' + (d.phone ? '<a class="btn dark" href="tel:' + esc(String(d.phone).replace(/[^0-9+]/g, '')) + '">Call ' + esc(d.phone) + '</a>' : '') +
+    (d.website && /^https?:\/\//i.test(d.website) ? '<a class="btn ghost" target="_blank" rel="noopener" href="' + esc(d.website) + '">Website</a>' : '') + '</div></div>' +
+    '<div class="bar"><h2>' + list.length + ' car' + (list.length === 1 ? '' : 's') + ' in stock</h2></div><div class="cards">' + list.map(cardHtml).join('') + '</div></div>';
+  window.scrollTo(0, 0);
+}
+
+// ---------- dealer sign-up ----------
+function viewJoin() {
+  const f = (k, l, t, req, ph) => '<div><label>' + l + (req ? ' *' : '') + '</label><input name="' + k + '" type="' + (t || 'text') + '"' + (req ? ' required' : '') + (ph ? ' placeholder="' + ph + '"' : '') + '></div>';
+  app().innerHTML = '<section class="hero" style="padding-bottom:34px"><div class="wrap"><h1>List your stock on <em>MotorNest</em></h1><p>Reach local buyers in and around Sheffield. Your stock updates automatically from your existing system.</p></div></section>' +
+    '<div class="wrap"><form class="panel" style="margin-top:18px;max-width:760px" onsubmit="return sendJoin(event)"><h3 style="margin:0 0 4px">Apply in two minutes</h3><p class="muted" style="margin:0 0 12px">We check every dealership before it goes live. Once approved, you log in with the email below.</p>' +
+    '<div class="grid g3">' + f('name', 'Dealership name', 'text', 1) + f('contact_name', 'Your name', 'text', 1) + f('phone', 'Phone', 'tel', 1) + f('email', 'Email (your login)', 'email', 1) + f('website', 'Website', 'text', 0, 'https://…') + f('address', 'Address') + f('town', 'Town', 'text', 0, 'Sheffield') + f('postcode', 'Postcode', 'text', 1) +
+    '<div><label>Cars in stock</label><select name="stock_size"><option value="">Select</option><option>1 to 20</option><option>21 to 50</option><option>51 to 100</option><option>100+</option></select></div></div>' +
+    '<div style="margin-top:10px"><label>Anything else?</label><textarea name="message" maxlength="1000" style="min-height:70px" placeholder="e.g. who runs your website or stock system"></textarea></div>' +
+    '<input name="company_fax" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">' +
+    '<button class="btn" style="margin-top:12px">Send application</button><div class="err" id="joinerr"></div></form></div>';
+  window.scrollTo(0, 0);
+}
+async function sendJoin(e) {
+  e.preventDefault(); const fm = e.target, b = $('button', fm), v = k => fm[k].value.trim() || null;
+  if (fm.company_fax.value) return false;
+  const row = { name: v('name'), contact_name: v('contact_name'), phone: v('phone'), email: (v('email') || '').toLowerCase(), website: v('website'), address: v('address'), town: v('town'), postcode: v('postcode'), stock_size: v('stock_size'), message: v('message') };
+  if (row.website && !/^https?:\/\//i.test(row.website)) row.website = 'https://' + row.website;
+  b.disabled = true;
+  const { error } = await sb.from('dealer_applications').insert(row);
+  b.disabled = false;
+  if (error) { $('#joinerr').textContent = 'Could not send: ' + error.message; return false; }
+  fm.innerHTML = '<h3 style="margin:0 0 6px">Application sent ✓</h3><p style="margin:0">Thanks. MotorNest will review <b>' + esc(row.name) + '</b> and be in touch. Once approved, go to <a href="#/portal"><b>Dealer login</b></a> and create your account with <b>' + esc(row.email) + '</b>.</p>';
+  return false;
+}
+
+// ---------- auth ----------
+async function loadAccess() {
+  S.isAdmin = false; S.myDealers = [];
+  if (!S.user) { S.dealer = null; S.managing = false; return; }
+  try { await sb.rpc('claim_access'); } catch (e) { }
+  const a = await sb.from('admins').select('user_id').maybeSingle(); S.isAdmin = !!a.data;
+  const d = await sb.from('dealer_users').select('dealer:dealers!dealer_users_dealer_id_fkey(*)').eq('user_id', S.user.id);
+  S.myDealers = (d.data || []).map(x => x.dealer).filter(Boolean);
+  if (!S.managing) S.dealer = S.myDealers[0] || null;
+}
+async function doAuth(e, mode) {
+  e.preventDefault(); const fm = e.target.form || e.target, email = fm.email.value.trim(), password = fm.password.value, er = $('#autherr');
+  er.textContent = '';
+  if (!email || password.length < 8) { er.textContent = 'Enter your email and a password of at least 8 characters.'; return false; }
+  const res = mode === 'up' ? await sb.auth.signUp({ email, password }) : await sb.auth.signInWithPassword({ email, password });
+  if (res.error) { er.textContent = res.error.message; return false; }
+  if (!res.data.session) { er.style.color = 'var(--ok)'; er.textContent = 'Account created. Check your email, click the confirm link, then come back here and sign in.'; return false; }
+  S.user = res.data.user; S.cars = null; await loadAccess(); nav(); route(); return false;
+}
+async function signOut() { await sb.auth.signOut(); S.user = null; S.managing = false; S.cars = null; await loadAccess(); nav(); location.hash = '#/'; route(); }
+async function claimAdmin(e) {
+  e.preventDefault(); const { data, error } = await sb.rpc('claim_admin', { code: e.target.code.value.trim() });
+  if (error || !data) { toast('That code is not valid'); return false; }
+  await loadAccess(); nav(); location.hash = '#/admin'; return false;
+}
+
+// ---------- dealer portal ----------
+async function viewPortal() {
+  if (!S.user) {
+    app().innerHTML = '<div class="wrap"><form class="panel narrow" onsubmit="return doAuth(event,\'in\')"><h2 style="margin:0 0 4px">Dealer portal</h2><p class="muted" style="margin:0 0 12px">Sign in to manage your stock and enquiries.</p>' +
+      '<label>Email</label><input name="email" type="email" autocomplete="email" required><div style="height:8px"></div><label>Password</label><input name="password" type="password" autocomplete="current-password" required minlength="8">' +
+      '<div class="acts" style="margin-top:12px"><button class="btn" style="flex:1">Sign in</button><button type="button" class="btn ghost" style="flex:1" onclick="doAuth(event,\'up\')">Create account</button></div><div class="err" id="autherr"></div>' +
+      '<p class="muted" style="font-size:13px;margin-bottom:0">Approved dealer? Create an account with the email you applied with. Not registered yet? <a href="#/join"><b>Apply to list your stock</b></a>.</p></form></div>';
+    return;
+  }
+  if (!S.dealer) {
+    if (S.isAdmin) { location.hash = '#/admin'; return; }
+    app().innerHTML = '<div class="wrap"><div class="panel narrow"><h2 style="margin:0 0 6px">Not linked to a dealership yet</h2><p>You are signed in as <b>' + esc(S.user.email) + '</b>, but this email has not been registered to a dealership. If you have applied, you will be linked as soon as MotorNest approves you. If not, <a href="#/join"><b>apply to list your stock</b></a> using this email.</p>' +
+      '<form onsubmit="return claimAdmin(event)" style="border-top:1px solid var(--line);padding-top:12px"><label>Site owner setup code</label><input name="code" placeholder="MN-…" required><button class="btn dark" style="margin-top:8px">Unlock admin</button></form></div></div>';
+    return;
+  }
+  const d = S.dealer, tabs = [['stock', 'Stock'], ['enq', 'Enquiries'], ['csv', 'CSV upload'], ['feed', 'Automatic feed'], ['profile', 'Profile']];
+  app().innerHTML = '<div class="wrap"><div class="bar"><div><h2>' + esc(d.name) + ' <span class="badge ' + esc(d.status) + '">' + esc(d.status) + '</span></h2>' +
+    (S.managing ? '<span class="muted">Managing as admin · <a href="#/admin" onclick="S.managing=false;S.dealer=S.myDealers[0]||null">back to admin</a></span>' : '') + '</div>' +
+    (d.status === 'approved' ? '<a class="btn ghost sm" href="#/dealer/' + esc(d.slug) + '">View public page</a>' : '') + '</div>' +
+    (d.status !== 'approved' ? '<div class="note">This dealership is <b>' + esc(d.status) + '</b>. Cars will not show on MotorNest until it is approved.</div>' : '') +
+    '<div class="tabs">' + tabs.map(t => '<button class="tab' + (S.tab === t[0] ? ' on' : '') + '" onclick="S.tab=\'' + t[0] + '\';viewPortal()">' + t[1] + '</button>').join('') + '</div><div id="tab"><div class="center">Loading…</div></div></div>';
+  try { await ({ stock: tabStock, enq: tabEnq, csv: tabCsv, feed: tabFeed, profile: tabProfile }[S.tab] || tabStock)(); } catch (e) { fail(e); }
+}
+async function dealerCars() {
+  const { data, error } = await sb.from('cars').select('*,photos:car_photos!car_photos_car_id_fkey(id,path,sort_order)').eq('dealer_id', S.dealer.id).order('created_at', { ascending: false });
+  if (error) throw error; data.forEach(c => c.photos.sort((a, b) => a.sort_order - b.sort_order)); S.stock = data; return data;
+}
+async function tabStock() {
+  const cars = await dealerCars(), n = s => cars.filter(c => c.status === s).length;
+  $('#tab').innerHTML = '<div class="bar" style="margin-top:0"><span class="muted">' + n('live') + ' live · ' + n('draft') + ' draft · ' + n('sold') + ' sold</span><button class="btn" onclick="editCar()">+ Add a car</button></div>' +
+    (cars.length ? cars.map(c => '<div class="row">' + img(c) + '<div class="info"><b>' + esc(title(c)) + ' <span class="badge ' + c.status + '">' + c.status + '</span></b><small>' + esc([c.reg, c.variant].filter(Boolean).join(' · ')) + '</small><div><b>' + money(c.price) + '</b> <small>' + (c.mileage != null ? num(c.mileage) + ' miles' : '') + '</small></div></div>' +
+      '<div class="acts"><button class="btn ghost sm" onclick="editCar(\'' + c.id + '\')">Edit</button>' +
+      (c.status === 'sold' ? '<button class="btn ghost sm" onclick="setStatus(\'' + c.id + '\',\'live\')">Relist</button>' : '<button class="btn dark sm" onclick="setStatus(\'' + c.id + '\',\'sold\')">Mark sold</button>') +
+      '<button class="btn danger sm" onclick="delCar(\'' + c.id + '\')">Delete</button></div></div>').join('') : '<div class="center">No cars yet. Add your first car or upload a CSV of your stock.</div>');
+}
+async function setStatus(id, st) { const { error } = await sb.from('cars').update({ status: st }).eq('id', id); if (error) return fail(error); S.cars = null; toast(st === 'sold' ? 'Marked as sold' : 'Back on sale'); tabStock(); }
+async function delCar(id) {
+  if (!confirm('Delete this car and its photos? This cannot be undone.')) return;
+  const c = (S.stock || []).find(x => x.id === id);
+  const own = c ? c.photos.map(p => p.path).filter(x => !/^https:\/\//i.test(x)) : [];
+  if (own.length) await sb.storage.from('car-photos').remove(own);
+  const { error } = await sb.from('cars').delete().eq('id', id); if (error) return fail(error);
+  S.cars = null; toast('Car deleted'); tabStock();
+}
+function fieldHtml(f, c) {
+  const v = c[f[0]] == null ? '' : c[f[0]], req = f[3] ? ' required' : '';
+  const inp = f[2] === 'select' ? '<select name="' + f[0] + '">' + opts(f[4].includes(v) || !v ? f[4] : [v].concat(f[4]), v, 'Select') + '</select>' : '<input name="' + f[0] + '" type="' + f[2] + '" value="' + esc(v) + '"' + req + (f[2] === 'number' ? ' min="0" step="1" inputmode="numeric"' : '') + '>';
+  return '<div><label>' + f[1] + (f[3] ? ' *' : '') + '</label>' + inp + '</div>';
+}
+function editCar(id) {
+  const c = id ? S.stock.find(x => x.id === id) : { status: 'live', photos: [] };
+  $('#tab').innerHTML = '<form class="panel" onsubmit="return saveCar(event,\'' + (id || '') + '\')"><h3 style="margin:0 0 10px">' + (id ? 'Edit car' : 'Add a car') + '</h3>' +
+    '<label>Reg number</label><div style="display:flex;gap:8px"><input name="reg" value="' + esc(c.reg || '') + '" maxlength="8" placeholder="e.g. YS19 ABC" style="text-transform:uppercase;max-width:220px"><button type="button" class="btn dark" onclick="regLookup(this)">Look up</button></div><div class="muted" id="regmsg" style="font-size:13px;margin:4px 0 12px">Look up fills in make, colour, fuel, year, engine and MOT from DVLA.</div>' +
+    '<div class="grid g3">' + CAR_FIELDS.map(f => fieldHtml(f, c)).join('') +
+    '<div><label>Status</label><select name="status">' + ['live', 'draft', 'sold'].map(s => '<option' + (c.status === s ? ' selected' : '') + '>' + s + '</option>').join('') + '</select></div></div>' +
+    '<div style="margin-top:10px"><label>Description</label><textarea name="description" maxlength="5000">' + esc(c.description || '') + '</textarea></div>' +
+    '<div style="margin-top:10px"><label>Photos</label><div class="pgrid" id="pgrid">' + c.photos.map(p => '<div class="p"><img alt="" src="' + esc(photoUrl(p.path)) + '"><button type="button" title="Remove" onclick="delPhoto(\'' + p.id + '\',this)">×</button></div>').join('') + '</div>' +
+    '<input name="photos" type="file" accept="image/*" multiple style="margin-top:8px"><div class="muted" style="font-size:13px">Add as many as you like. The first photo is the main one.</div></div>' +
+    '<div class="acts" style="margin-top:14px"><button class="btn" id="savebtn">Save car</button><button type="button" class="btn ghost" onclick="tabStock()">Cancel</button></div><div class="err" id="carerr"></div></form>';
+  window.scrollTo(0, 0);
+}
+async function regLookup(btn) {
+  const fm = btn.form, reg = fm.reg.value.replace(/\s/g, '').toUpperCase(), m = $('#regmsg');
+  if (reg.length < 2) { m.textContent = 'Type a reg first.'; return; }
+  btn.disabled = true; m.textContent = 'Looking up ' + reg + '…';
+  const { data, error } = await sb.functions.invoke('reg-lookup', { body: { reg } });
+  btn.disabled = false;
+  if (error || !data) { m.textContent = 'Lookup is not available right now. Fill in the details by hand.'; return; }
+  if (data.error === 'not_configured') { m.textContent = 'Reg lookup is not switched on yet (MotorNest needs to add its DVLA key). Fill in the details by hand for now.'; return; }
+  if (data.error) { m.textContent = data.error; return; }
+  const fuel = /HYBRID/i.test(data.fuel || '') ? 'Hybrid' : /ELECTRIC/i.test(data.fuel || '') ? 'Electric' : tcase(data.fuel);
+  const set = (k, v) => { if (v != null && v !== '' && fm[k]) fm[k].value = v; };
+  set('make', tcase(data.make)); set('colour', tcase(data.colour)); set('fuel', fuel); set('year', data.year); set('engine_cc', data.engine_cc); set('mot_expiry', data.mot_expiry);
+  m.textContent = 'Found: ' + tcase(data.make) + '. Add the model, price and mileage.';
+}
+function shrink(file) {
+  return new Promise((res, rej) => {
+    const im = new Image(), u = URL.createObjectURL(file);
+    im.onload = () => { const k = Math.min(1, 1600 / Math.max(im.width, im.height)), cv = document.createElement('canvas'); cv.width = Math.round(im.width * k); cv.height = Math.round(im.height * k); cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height); URL.revokeObjectURL(u); cv.toBlob(b => b ? res(b) : rej(new Error('Could not read photo')), 'image/jpeg', 0.85); };
+    im.onerror = () => rej(new Error('Could not read photo ' + file.name)); im.src = u;
+  });
+}
+async function saveCar(e, id) {
+  e.preventDefault(); const fm = e.target, b = $('#savebtn'), er = $('#carerr'), row = { description: fm.description.value.trim() || null, status: fm.status.value, reg: fm.reg.value.replace(/\s/g, '').toUpperCase() || null };
+  CAR_FIELDS.forEach(f => { let v = fm[f[0]].value.trim(); row[f[0]] = v === '' ? null : INT_FIELDS.includes(f[0]) ? parseInt(v, 10) : v; });
+  b.disabled = true; er.textContent = '';
+  try {
+    let carId = id;
+    if (id) { const { error } = await sb.from('cars').update(row).eq('id', id); if (error) throw error; }
+    else { row.dealer_id = S.dealer.id; const { data, error } = await sb.from('cars').insert(row).select('id').single(); if (error) throw error; carId = data.id; }
+    const files = [...fm.photos.files], base = id ? (S.stock.find(x => x.id === id).photos.reduce((m, p) => Math.max(m, p.sort_order), -1) + 1) : 0;
+    for (let i = 0; i < files.length; i++) {
+      b.textContent = 'Uploading photo ' + (i + 1) + ' of ' + files.length + '…';
+      const blob = await shrink(files[i]), path = S.dealer.id + '/' + carId + '/' + crypto.randomUUID() + '.jpg';
+      const up = await sb.storage.from('car-photos').upload(path, blob, { contentType: 'image/jpeg' }); if (up.error) throw up.error;
+      const ins = await sb.from('car_photos').insert({ car_id: carId, dealer_id: S.dealer.id, path, sort_order: base + i }); if (ins.error) throw ins.error;
+    }
+    S.cars = null; toast('Car saved'); tabStock();
+  } catch (x) { er.textContent = x.message || 'Could not save'; b.disabled = false; b.textContent = 'Save car'; }
+  return false;
+}
+async function delPhoto(pid, btn) {
+  const { data } = await sb.from('car_photos').select('path').eq('id', pid).maybeSingle();
+  if (data && !/^https:\/\//i.test(data.path)) await sb.storage.from('car-photos').remove([data.path]);
+  const { error } = await sb.from('car_photos').delete().eq('id', pid); if (error) return fail(error);
+  btn.parentNode.remove(); S.cars = null;
+}
+async function tabEnq() {
+  const { data, error } = await sb.from('enquiries').select('*,car:cars!enquiries_car_id_fkey(make,model,year,reg)').eq('dealer_id', S.dealer.id).order('created_at', { ascending: false }).limit(300);
+  if (error) throw error;
+  $('#tab').innerHTML = data.length ? data.map(enqRow).join('') : '<div class="center">No enquiries yet. They will appear here as soon as a customer sends one.</div>';
+}
+function enqRow(q) {
+  return '<div class="row"><div class="info"><b>' + esc(q.name) + ' <span class="badge ' + esc(q.status) + '">' + esc(q.status) + '</span></b><small>' + (q.car ? esc(title(q.car)) + (q.car.reg ? ' · ' + esc(q.car.reg) : '') : 'Car removed') + (q.dealer ? ' · ' + esc(q.dealer.name) : '') + ' · ' + new Date(q.created_at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) + '</small>' +
+    '<div>' + (q.phone ? '<a href="tel:' + esc(q.phone.replace(/[^0-9+]/g, '')) + '">' + esc(q.phone) + '</a> ' : '') + (q.email ? '<a href="mailto:' + esc(q.email) + '">' + esc(q.email) + '</a>' : '') + '</div>' + (q.message ? '<div style="white-space:pre-wrap;margin-top:4px">' + esc(q.message) + '</div>' : '') + '</div>' +
+    '<div class="acts"><select onchange="enqStatus(\'' + q.id + '\',this.value)" style="width:auto">' + ['new', 'contacted', 'closed'].map(s => '<option' + (q.status === s ? ' selected' : '') + '>' + s + '</option>').join('') + '</select></div></div>';
+}
+async function enqStatus(id, st) { const { error } = await sb.from('enquiries').update({ status: st }).eq('id', id); if (error) return fail(error); toast('Updated'); }
+
+// ----- CSV stock upload -----
+const CSV_COLS = ['reg', 'make', 'model', 'variant', 'year', 'price', 'mileage', 'fuel', 'gearbox', 'body_type', 'colour', 'engine_cc', 'doors', 'seats', 'owners', 'mot_expiry', 'description'];
+const CSV_ALIAS = { registration: 'reg', vrm: 'reg', reg_number: 'reg', registration_number: 'reg', trim: 'variant', derivative: 'variant', miles: 'mileage', odometer: 'mileage', fuel_type: 'fuel', transmission: 'gearbox', body: 'body_type', bodytype: 'body_type', color: 'colour', engine: 'engine_cc', engine_size: 'engine_cc', cc: 'engine_cc', mot: 'mot_expiry', mot_due: 'mot_expiry', previous_owners: 'owners', price_gbp: 'price' };
+function parseCSV(t) {
+  const rows = []; let r = [], f = '', q = false;
+  for (let i = 0; i < t.length; i++) {
+    const c = t[i];
+    if (q) { if (c === '"') { if (t[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += c; }
+    else if (c === '"') q = true;
+    else if (c === ',') { r.push(f); f = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && t[i + 1] === '\n') i++; r.push(f); f = ''; if (r.some(x => x.trim() !== '')) rows.push(r); r = []; }
+    else f += c;
+  }
+  r.push(f); if (r.some(x => x.trim() !== '')) rows.push(r);
+  return rows;
+}
+function csvToCars(text) {
+  const rows = parseCSV(text.replace(/^﻿/, '')); if (rows.length < 2) return { cars: [], bad: 0 };
+  const head = rows[0].map(h => { const k = h.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, ''); return CSV_ALIAS[k] || k; });
+  const cars = []; let bad = 0;
+  rows.slice(1).forEach(r => {
+    const c = {};
+    head.forEach((h, i) => {
+      if (!CSV_COLS.includes(h)) return; let v = (r[i] || '').trim(); if (v === '') return;
+      if (INT_FIELDS.includes(h)) { const n = parseInt(v.replace(/[^0-9.]/g, ''), 10); if (!isNaN(n)) c[h] = n; }
+      else if (h === 'mot_expiry') { const m = v.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/); if (m) v = m[3] + '-' + m[2].padStart(2, '0') + '-' + m[1].padStart(2, '0'); if (/^\d{4}-\d{2}-\d{2}$/.test(v)) c[h] = v; }
+      else if (h === 'reg') c[h] = v.replace(/\s/g, '').toUpperCase();
+      else if (h === 'gearbox') c[h] = /auto/i.test(v) ? 'Automatic' : /man/i.test(v) ? 'Manual' : v;
+      else c[h] = v;
+    });
+    if (c.make && c.model && c.price != null) cars.push(c); else bad++;
+  });
+  return { cars, bad };
+}
+function tabCsv() {
+  const sample = CSV_COLS.join(',') + '\nYS19ABC,Ford,Fiesta,1.0 EcoBoost Zetec,2019,8995,41000,Petrol,Manual,Hatchback,Blue,999,5,5,2,14/06/2027,"Full service history, two keys"\n';
+  $('#tab').innerHTML = '<div class="panel"><h3 style="margin:0 0 6px">Upload your whole stock from a spreadsheet</h3><p class="muted" style="margin:0 0 10px">Save your stock list as a CSV file with these column headings. Cars are matched by reg: existing cars are updated, new ones are added.</p>' +
+    '<pre class="code">' + esc(sample) + '</pre><a class="btn ghost sm" download="motornest-stock-template.csv" href="data:text/csv;charset=utf-8,' + encodeURIComponent(sample) + '">Download template</a>' +
+    '<div style="margin-top:14px"><label>CSV file</label><input type="file" id="csvfile" accept=".csv,text/csv" onchange="csvPreview(this)"></div>' +
+    '<label style="display:flex;gap:8px;align-items:center;text-transform:none;font-size:14px;margin-top:10px;color:var(--ink)"><input type="checkbox" id="csvsold" style="width:auto"> Mark my live cars that are not in this file as sold</label>' +
+    '<div id="csvout" style="margin-top:10px"></div></div>';
+  return Promise.resolve();
+}
+async function csvPreview(inp) {
+  const file = inp.files[0]; if (!file) return; const res = csvToCars(await file.text()); S.csv = res.cars;
+  $('#csvout').innerHTML = (res.cars.length ? '<div class="note">' + res.cars.length + ' car' + (res.cars.length === 1 ? '' : 's') + ' ready to import' + (res.bad ? ', ' + res.bad + ' row(s) skipped (missing make, model or price)' : '') + '.</div><button class="btn" onclick="csvImport(this)">Import ' + res.cars.length + ' cars</button>' : '<div class="err">No valid cars found. Check the column headings match the template.</div>');
+}
+async function csvImport(btn) {
+  btn.disabled = true; btn.textContent = 'Importing…';
+  try {
+    const existing = await dealerCars(), byReg = {}; existing.forEach(c => { if (c.reg) byReg[c.reg] = c; });
+    const add = [], seen = new Set(); let upd = 0, sold = 0;
+    for (const c of S.csv) {
+      if (c.reg) seen.add(c.reg);
+      if (c.reg && byReg[c.reg]) { const u = Object.assign({}, c); if (byReg[c.reg].status === 'sold') u.status = 'live'; const { error } = await sb.from('cars').update(u).eq('id', byReg[c.reg].id); if (error) throw error; upd++; }
+      else add.push(Object.assign({ dealer_id: S.dealer.id, source: 'csv', status: 'live' }, c));
+    }
+    for (let i = 0; i < add.length; i += 100) { const { error } = await sb.from('cars').insert(add.slice(i, i + 100)); if (error) throw error; }
+    if ($('#csvsold').checked) for (const c of existing) if (c.status === 'live' && c.reg && !seen.has(c.reg)) { await sb.from('cars').update({ status: 'sold' }).eq('id', c.id); sold++; }
+    S.cars = null; $('#csvout').innerHTML = '<div class="note">Done: ' + add.length + ' added, ' + upd + ' updated' + (sold ? ', ' + sold + ' marked sold' : '') + '. Add photos from the Stock tab.</div>';
+  } catch (e) { $('#csvout').innerHTML = '<div class="err">Import stopped: ' + esc(e.message) + '</div>'; }
+}
+async function tabFeed() {
+  const d = S.dealer, ep = SB_URL + '/functions/v1/stock-feed';
+  const [f, r] = await Promise.all([
+    sb.from('dealer_feeds').select('dealer_id,key_hint,feed_url,site_url,last_sync_at,last_result').eq('dealer_id', d.id).maybeSingle(),
+    sb.from('feed_runs').select('*').eq('dealer_id', d.id).order('ran_at', { ascending: false }).limit(10)]);
+  const feed = f.data || {}, lr = feed.last_result, when = t => new Date(t).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
+  S.feedHasKey = !!feed.key_hint;
+  const sample = '{"cars":[{"stock_id":"H123","reg":"YS19ABC","make":"Ford","model":"Fiesta","variant":"1.0 EcoBoost Zetec","year":2019,"price":8995,"mileage":41000,"fuel":"Petrol","gearbox":"Manual","colour":"Blue","photos":["https://your-site.co.uk/photos/h123-1.jpg"]}]}';
+  $('#tab').innerHTML = '<div class="panel"><h3 style="margin:0 0 6px">Automatic stock feed</h3>' +
+    '<p style="margin:0">' + (feed.last_sync_at ? 'Last sync <b>' + when(feed.last_sync_at) + '</b>' + (lr ? ': ' + lr.added + ' added, ' + lr.updated + ' updated, ' + lr.sold + ' marked sold, ' + lr.skipped + ' skipped' : '') : 'No sync yet.') + '</p>' +
+    '<p class="muted" style="margin:6px 0 0;font-size:14px">Cars are matched by stock number or reg. A car that drops out of the feed is marked sold. A car with no price stays hidden as a draft.</p></div>' +
+    '<div class="panel" style="margin-top:12px"><h3 style="margin:0 0 6px">Option 1: MotorNest reads your website</h3><p class="muted" style="margin:0 0 8px;font-size:14px">For dealer websites on AA Cars DNA. Enter your website address and MotorNest copies your cars, prices and photos from your stock pages every hour. By saving, you confirm MotorNest has your permission to do this.</p>' +
+    '<label>Website address</label><input id="siteurl" placeholder="https://your-dealership.co.uk" value="' + esc(feed.site_url || '') + '"><div class="acts" style="margin-top:8px"><button class="btn" onclick="feedSiteSave()">Save website</button><button class="btn dark" onclick="feedSync(this)">Sync now</button></div><div id="syncout2" style="margin-top:8px"></div></div>' +
+    '<div class="panel" style="margin-top:12px"><h3 style="margin:0 0 6px">Option 2: MotorNest collects your stock feed</h3><p class="muted" style="margin:0 0 8px;font-size:14px">Paste the link to your stock feed (JSON or CSV, from your website or stock system). MotorNest checks it every hour.</p>' +
+    '<label>Feed link</label><input id="feedurl" placeholder="https://…" value="' + esc(feed.feed_url || '') + '"><div class="acts" style="margin-top:8px"><button class="btn" onclick="feedUrlSave()">Save link</button><button class="btn dark" onclick="feedSync(this)">Sync now</button></div><div id="syncout" style="margin-top:8px"></div></div>' +
+    '<div class="panel" style="margin-top:12px"><h3 style="margin:0 0 6px">Option 3: your system sends stock to MotorNest</h3><p class="muted" style="margin:0 0 8px;font-size:14px">Give these to whoever runs your website or stock system. They send your full stock list whenever it changes.</p>' +
+    '<label>Feed address</label><pre class="code">POST ' + esc(ep) + '\nHeader  x-feed-key: YOUR-KEY\nBody    JSON or CSV</pre>' +
+    '<label>Feed key</label><div>' + (feed.key_hint ? '<b>' + esc(feed.key_hint) + '</b> ' : '<span class="muted">No key yet </span>') + '<button class="btn ghost sm" onclick="feedKey()">' + (feed.key_hint ? 'Reset key' : 'Create key') + '</button></div><div id="keyout"></div>' +
+    '<label style="margin-top:10px">Example</label><pre class="code">' + esc(sample) + '</pre></div>' +
+    '<div class="bar"><h2>Recent syncs</h2></div>' + ((r.data || []).map(x => '<div class="row"><div class="info"><b>' + when(x.ran_at) + ' · ' + esc(x.source) + '</b><small>' + (x.note ? esc(x.note) : x.received + ' received, ' + x.added + ' added, ' + x.updated + ' updated, ' + x.sold + ' sold, ' + x.skipped + ' skipped') + '</small></div></div>').join('') || '<div class="muted">Nothing yet.</div>');
+}
+async function feedKey() {
+  if (S.feedHasKey && !confirm('Reset the key? The old key stops working straight away.')) return;
+  const { data, error } = await sb.rpc('feed_key_rotate', { p_dealer: S.dealer.id }); if (error) return fail(error);
+  S.feedHasKey = true;
+  $('#keyout').innerHTML = '<div class="note">Copy this key now. It is only shown once.<pre class="code" style="margin:8px 0 0">' + esc(data) + '</pre></div>';
+}
+async function feedSiteSave() {
+  const { error } = await sb.rpc('feed_site_set', { p_dealer: S.dealer.id, p_url: $('#siteurl').value }); if (error) return fail(error);
+  toast('Website saved');
+}
+async function feedUrlSave() {
+  const { error } = await sb.rpc('feed_url_set', { p_dealer: S.dealer.id, p_url: $('#feedurl').value }); if (error) return fail(error);
+  toast('Feed link saved');
+}
+async function feedSync(btn) {
+  const out = btn.closest('.panel').querySelector('[id^=syncout]');
+  btn.disabled = true; out.innerHTML = '<span class="muted">Syncing… this can take a minute.</span>';
+  const a = await sb.rpc('feed_url_set', { p_dealer: S.dealer.id, p_url: $('#feedurl').value });
+  const b = await sb.rpc('feed_site_set', { p_dealer: S.dealer.id, p_url: $('#siteurl').value });
+  const e1 = a.error || b.error;
+  if (e1) { btn.disabled = false; out.innerHTML = '<div class="err">' + esc(e1.message) + '</div>'; return; }
+  let { data, error } = await sb.functions.invoke('stock-feed', { body: { dealer_id: S.dealer.id } });
+  if (error && error.context && error.context.json) { try { data = await error.context.json(); } catch (x) { } }
+  btn.disabled = false; S.cars = null;
+  if (data && data.ok) { toast('Stock synced'); tabFeed(); }
+  else out.innerHTML = '<div class="err">' + esc((data && data.error) || 'Sync failed') + '</div>';
+}
+function tabProfile() {
+  const d = S.dealer, f = (k, l, t) => '<div><label>' + l + '</label><input name="' + k + '" type="' + (t || 'text') + '" value="' + esc(d[k] || '') + '"></div>';
+  $('#tab').innerHTML = '<form class="panel" onsubmit="return saveProfile(event)"><h3 style="margin:0 0 10px">Dealership profile</h3><div class="grid g3">' + f('name', 'Dealership name') + f('phone', 'Phone', 'tel') + f('email', 'Email', 'email') + f('website', 'Website (https://…)') + f('address', 'Address') + f('town', 'Town') + f('postcode', 'Postcode') + '</div>' +
+    '<div style="margin-top:10px"><label>About</label><textarea name="about" maxlength="3000">' + esc(d.about || '') + '</textarea></div><button class="btn" style="margin-top:12px">Save profile</button></form>';
+  return Promise.resolve();
+}
+async function saveProfile(e) {
+  e.preventDefault(); const fm = e.target, u = {};
+  ['name', 'phone', 'email', 'website', 'address', 'town', 'postcode', 'about'].forEach(k => u[k] = fm[k].value.trim() || null);
+  if (!u.name) { toast('Name is required'); return false; }
+  if (u.postcode) { const g = await geocode(u.postcode); if (g) { u.lat = g.lat; u.lng = g.lng; } else toast('Postcode not recognised, distance may be missing'); }
+  const { data, error } = await sb.from('dealers').update(u).eq('id', S.dealer.id).select().single(); if (error) { fail(error); return false; }
+  S.dealer = data; S.cars = null; toast('Profile saved'); viewPortal(); return false;
+}
+
+// ---------- admin ----------
+async function viewAdmin() {
+  if (!S.user) { location.hash = '#/portal'; return; }
+  if (!S.isAdmin) { app().innerHTML = '<div class="wrap"><div class="center">Admin only.</div></div>'; return; }
+  const tabs = [['apps', 'Applications'], ['dealers', 'Dealers'], ['cars', 'All listings'], ['enq', 'All enquiries']];
+  app().innerHTML = '<div class="wrap"><div class="bar"><h2>MotorNest admin</h2></div><div class="tabs">' + tabs.map(t => '<button class="tab' + (S.atab === t[0] ? ' on' : '') + '" onclick="S.atab=\'' + t[0] + '\';viewAdmin()">' + t[1] + '</button>').join('') + '</div><div id="tab"><div class="center">Loading…</div></div></div>';
+  try { await ({ apps: adApps, dealers: adDealers, cars: adCars, enq: adEnq }[S.atab])(); } catch (e) { fail(e); }
+}
+async function adApps() {
+  const { data, error } = await sb.from('dealer_applications').select('*').order('created_at', { ascending: false }).limit(300); if (error) throw error;
+  S.apps = data; const fresh = data.filter(a => a.status === 'new').length;
+  $('#tab').innerHTML = '<div class="bar" style="margin-top:0"><span class="muted">' + fresh + ' waiting for a decision · ' + data.length + ' in total</span></div>' +
+    (data.map(a => '<div class="row"><div class="info"><b>' + esc(a.name) + ' <span class="badge ' + (a.status === 'rejected' ? 'sold' : a.status) + '">' + esc(a.status) + '</span></b>' +
+      '<small>' + esc([a.contact_name, a.town, a.postcode, a.stock_size ? a.stock_size + ' cars' : ''].filter(Boolean).join(' · ')) + ' · ' + new Date(a.created_at).toLocaleDateString('en-GB') + '</small>' +
+      '<div><a href="tel:' + esc(a.phone.replace(/[^0-9+]/g, '')) + '">' + esc(a.phone) + '</a> · ' + esc(a.email) + (a.website ? ' · ' + esc(a.website) : '') + '</div>' + (a.message ? '<div style="white-space:pre-wrap;margin-top:4px">' + esc(a.message) + '</div>' : '') + '</div>' +
+      '<div class="acts">' + (a.status !== 'approved' ? '<button class="btn sm" onclick="appApprove(\'' + a.id + '\',this)">Approve</button>' : '') + (a.status === 'new' ? '<button class="btn ghost sm" onclick="appReject(\'' + a.id + '\')">Reject</button>' : '') + '<button class="btn danger sm" onclick="appDelete(\'' + a.id + '\')">Delete</button></div></div>').join('') ||
+      '<div class="center">No applications yet. Dealers apply from the "List your stock" page.</div>');
+}
+async function appApprove(id, btn) {
+  btn.disabled = true; const a = S.apps.find(x => x.id === id), g = a.postcode ? await geocode(a.postcode) : null;
+  const { error } = await sb.rpc('approve_application', { p_id: id, p_lat: g ? g.lat : null, p_lng: g ? g.lng : null });
+  if (error) { btn.disabled = false; return fail(error); }
+  S.cars = null; toast(a.name + ' approved. They can now sign up with ' + a.email); adApps();
+}
+async function appReject(id) { const { error } = await sb.from('dealer_applications').update({ status: 'rejected' }).eq('id', id); if (error) return fail(error); adApps(); }
+async function appDelete(id) { if (!confirm('Delete this application? An approved dealership stays registered.')) return; const { error } = await sb.from('dealer_applications').delete().eq('id', id); if (error) return fail(error); adApps(); }
+async function adDealers() {
+  const [d, c, i] = await Promise.all([sb.from('dealers').select('*').order('created_at'), sb.from('cars').select('dealer_id,status'), sb.from('dealer_invites').select('*')]);
+  if (d.error) throw d.error; S.allDealers = d.data;
+  const count = id => (c.data || []).filter(x => x.dealer_id === id && x.status === 'live').length, inv = id => (i.data || []).filter(x => x.dealer_id === id);
+  $('#tab').innerHTML = '<form class="panel" onsubmit="return addDealer(event)"><h3 style="margin:0 0 10px">Register a dealership</h3><div class="grid g3">' +
+    '<div><label>Dealership name *</label><input name="name" required></div><div><label>Phone</label><input name="phone" type="tel"></div><div><label>Public email</label><input name="email" type="email"></div>' +
+    '<div><label>Address</label><input name="address"></div><div><label>Town</label><input name="town" value="Sheffield"></div><div><label>Postcode</label><input name="postcode"></div>' +
+    '<div><label>Dealer login email</label><input name="login" type="email" placeholder="they sign up with this"></div></div><button class="btn" style="margin-top:12px">Add dealership</button></form>' +
+    '<div class="bar"><h2>' + d.data.length + ' dealerships</h2>' + (d.data.some(x => x.is_demo) ? '<button class="btn danger sm" onclick="removeDemo()">Remove demo data</button>' : '') + '</div>' +
+    d.data.map(x => '<div class="row"><div class="info"><b>' + esc(x.name) + ' <span class="badge ' + esc(x.status) + '">' + esc(x.status) + '</span>' + (x.is_demo ? ' <span class="badge draft">demo</span>' : '') + '</b><small>' + esc([x.town, x.postcode, x.phone].filter(Boolean).join(' · ')) + ' · ' + count(x.id) + ' live cars</small>' +
+      '<div><small>Login emails: ' + (inv(x.id).map(v => esc(v.email) + (v.claimed_at ? ' ✓' : ' (not signed up yet)')).join(', ') || 'none') + '</small></div></div><div class="acts">' +
+      (x.status !== 'approved' ? '<button class="btn sm" onclick="dealerStatus(\'' + x.id + '\',\'approved\')">Approve</button>' : '<button class="btn ghost sm" onclick="dealerStatus(\'' + x.id + '\',\'suspended\')">Suspend</button>') +
+      '<button class="btn dark sm" onclick="manageDealer(\'' + x.id + '\')">Manage stock</button><button class="btn ghost sm" onclick="addLogin(\'' + x.id + '\')">Add login email</button><button class="btn danger sm" onclick="delDealer(\'' + x.id + '\')">Delete</button></div></div>').join('');
+}
+async function addDealer(e) {
+  e.preventDefault(); const fm = e.target, v = k => fm[k].value.trim() || null, row = { name: v('name'), phone: v('phone'), email: v('email'), address: v('address'), town: v('town'), postcode: v('postcode'), status: 'approved' };
+  if (row.postcode) { const g = await geocode(row.postcode); if (g) { row.lat = g.lat; row.lng = g.lng; } else toast('Postcode not recognised, distance search will skip this dealer until fixed'); }
+  let slug = slugify(row.name), res;
+  for (let n = 1; n < 6; n++) { res = await sb.from('dealers').insert(Object.assign({ slug: n > 1 ? slug + '-' + n : slug }, row)).select().single(); if (!res.error || res.error.code !== '23505') break; }
+  if (res.error) { fail(res.error); return false; }
+  if (v('login')) { const r = await sb.from('dealer_invites').insert({ dealer_id: res.data.id, email: v('login').toLowerCase() }); if (r.error) fail(r.error); }
+  S.cars = null; toast('Dealership added'); adDealers(); return false;
+}
+async function dealerStatus(id, st) { const { error } = await sb.from('dealers').update({ status: st }).eq('id', id); if (error) return fail(error); S.cars = null; adDealers(); }
+function manageDealer(id) { S.dealer = S.allDealers.find(x => x.id === id); S.managing = true; S.tab = 'stock'; location.hash = '#/portal'; }
+async function addLogin(id) { const em = prompt('Email address the dealer will sign up with:'); if (!em) return; const { error } = await sb.from('dealer_invites').insert({ dealer_id: id, email: em.trim().toLowerCase() }); if (error) return fail(error); toast('Login email added'); adDealers(); }
+async function delDealer(id) { if (!confirm('Delete this dealership with all its cars and enquiries?')) return; const { error } = await sb.from('dealers').delete().eq('id', id); if (error) return fail(error); S.cars = null; adDealers(); }
+async function removeDemo() { if (!confirm('Remove the demo dealers and demo cars?')) return; const { error } = await sb.from('dealers').delete().eq('is_demo', true); if (error) return fail(error); S.cars = null; toast('Demo data removed'); adDealers(); }
+async function adCars() {
+  const { data, error } = await sb.from('cars').select('id,reg,make,model,year,price,status,dealer:dealers!cars_dealer_id_fkey(name)').order('created_at', { ascending: false }).limit(1000); if (error) throw error;
+  $('#tab').innerHTML = data.map(c => '<div class="row"><div class="info"><b>' + esc(title(c)) + ' <span class="badge ' + c.status + '">' + c.status + '</span></b><small>' + esc([c.reg, c.dealer && c.dealer.name].filter(Boolean).join(' · ')) + ' · ' + money(c.price) + '</small></div><div class="acts">' +
+    (c.status === 'live' ? '<button class="btn ghost sm" onclick="adCarStatus(\'' + c.id + '\',\'draft\')">Hide</button>' : '<button class="btn ghost sm" onclick="adCarStatus(\'' + c.id + '\',\'live\')">Make live</button>') + '</div></div>').join('') || '<div class="center">No listings yet.</div>';
+}
+async function adCarStatus(id, st) { const { error } = await sb.from('cars').update({ status: st }).eq('id', id); if (error) return fail(error); S.cars = null; adCars(); }
+async function adEnq() {
+  const { data, error } = await sb.from('enquiries').select('*,car:cars!enquiries_car_id_fkey(make,model,year,reg),dealer:dealers!enquiries_dealer_id_fkey(name)').order('created_at', { ascending: false }).limit(300); if (error) throw error;
+  $('#tab').innerHTML = data.map(enqRow).join('') || '<div class="center">No enquiries yet.</div>';
+}
+
+// ---------- router ----------
+function route() {
+  const h = location.hash.replace(/^#\/?/, ''), i = h.indexOf('/'), p = i < 0 ? h : h.slice(0, i), a = i < 0 ? '' : h.slice(i + 1);
+  nav();
+  if (p === 'car' && a) return viewCar(a);
+  if (p === 'dealer' && a) return viewDealer(decodeURIComponent(a));
+  if (p === 'join') return viewJoin();
+  if (p === 'portal') return viewPortal();
+  if (p === 'admin') return viewAdmin();
+  return viewHome();
+}
+window.addEventListener('hashchange', route);
+(async function () {
+  try { const { data } = await sb.auth.getSession(); S.user = data.session ? data.session.user : null; await loadAccess(); } catch (e) { console.error(e); }
+  route();
+})();
+</script>
+</body>
+</html>
