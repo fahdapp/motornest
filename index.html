@@ -639,7 +639,7 @@ async function viewCar(id) {
       (S.gal.list.length > 1 ? '<div class="thumbs" id="thumbs">' + S.gal.list.map((u, i) => '<button aria-label="Photo ' + (i + 1) + '" class="' + (i ? '' : 'on') + '" onclick="galGo(0,' + i + ')"><img loading="lazy" alt="" src="' + esc(u) + '"></button>').join('') + '</div>' : '')
       : '<div class="gal"><div class="ph">Photos coming soon</div></div>') +
     '<div class="titleblock"><h1>' + esc(title(c)) + '</h1>' + (c.variant ? '<div class="v">' + esc(c.variant) + '</div>' : '') +
-    '<div class="mprice"><span class="p">' + money(c.price) + '</span>' + (tel ? '<a class="btn" href="tel:' + esc(tel) + '">' + IC.phone + 'Call dealer</a>' : '') + '</div>' +
+    '<div class="mprice"><span class="p">' + money(c.price) + '</span>' + (tel ? '<a class="btn" href="tel:' + esc(tel) + '" onclick="logTap(\'' + c.dealer_id + '\',\'' + c.id + '\',\'call\')">' + IC.phone + 'Call dealer</a>' : '') + '</div>' +
     '<div class="keyfacts">' + (c.mileage != null ? '<span>' + IC.road + num(c.mileage) + ' miles</span>' : '') + (c.year ? '<span>' + IC.cal + c.year + '</span>' : '') +
     (c.fuel ? '<span>' + IC.fuel + esc(c.fuel) + '</span>' : '') + (c.gearbox ? '<span>' + IC.gear + esc(c.gearbox) + '</span>' : '') + '</div></div>' +
     '<dl class="specgrid">' + sp('Body style', c.body_type) + sp('Colour', c.colour) + sp('Engine', c.engine_cc ? (c.engine_cc / 1000).toFixed(1) + ' litre' : null) +
@@ -649,14 +649,14 @@ async function viewCar(id) {
     '<aside class="side"><div class="pricecard"><div class="p">' + money(c.price) + '</div>' +
     '<div class="seller"><span class="mono">' + esc(initials(d.name)) + '</span><span><a href="#/dealer/' + esc(d.slug) + '">' + esc(d.name) + '</a><small>' + esc([d.town, d.postcode].filter(Boolean).join(', ')) +
     (c.dist != null ? ', ' + c.dist.toFixed(1) + ' miles from ' + esc(S.origin.label) : '') + '</small></span></div>' +
-    (tel ? '<a class="btn" href="tel:' + esc(tel) + '">' + IC.phone + 'Call ' + esc(d.phone) + '</a>' : '') + '</div>' +
+    (tel ? '<a class="btn" href="tel:' + esc(tel) + '" onclick="logTap(\'' + c.dealer_id + '\',\'' + c.id + '\',\'call\')">' + IC.phone + 'Call ' + esc(d.phone) + '</a>' : '') + '</div>' +
     '<form class="enq" onsubmit="return sendEnquiry(event,\'' + c.id + '\')"><h2>Ask the dealer about this car</h2>' +
     '<div class="f"><label for="en">Your name</label><input id="en" name="name" required maxlength="120" autocomplete="name"></div>' +
     '<div class="row2 f"><div><label for="ep">Phone</label><input id="ep" name="phone" type="tel" maxlength="40" autocomplete="tel"></div><div><label for="ee">Email</label><input id="ee" name="email" type="email" maxlength="200" autocomplete="email"></div></div>' +
     '<div class="f"><label for="em">Message</label><textarea id="em" name="message" maxlength="2000">Hi, is the ' + esc(title(c)) + ' still available?</textarea></div>' +
     '<button class="btn dark" style="width:100%">Send to ' + esc(d.name) + '</button><div class="err" id="enqerr"></div></form></aside></div>' +
     '<div class="morecars">' + railHtml('More cars like this', 'Similar body style and price.', shuffle(alike.slice(0, 12))) + railHtml('More from ' + esc(d.name), '', shuffle(fromDealer)) + '</div></div>' +
-    '<div class="stickybar"><span class="p">' + money(c.price) + '</span>' + (tel ? '<a class="btn dark" href="tel:' + esc(tel) + '">' + IC.phone + 'Call</a>' : '') +
+    '<div class="stickybar"><span class="p">' + money(c.price) + '</span>' + (tel ? '<a class="btn dark" href="tel:' + esc(tel) + '" onclick="logTap(\'' + c.dealer_id + '\',\'' + c.id + '\',\'call\')">' + IC.phone + 'Call</a>' : '') +
     '<button class="btn" onclick="document.querySelector(\'.enq\').scrollIntoView({behavior:\'smooth\'});setTimeout(()=>document.getElementById(\'en\').focus(),400)">Message</button></div>';
   document.body.classList.add('has-sticky');
   window.scrollTo(0, 0);
@@ -667,6 +667,14 @@ function galGo(step, to) {
   $('#gmain').src = g.list[g.i];
   const ctr = $('#gctr'); if (ctr) ctr.textContent = (g.i + 1) + ' / ' + g.list.length;
   const th = $('#thumbs'); if (th) [...th.children].forEach((b, i) => { b.classList.toggle('on', i === g.i); if (i === g.i) b.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' }); });
+}
+// count taps on Call / Visit website (no personal data is stored)
+function logTap(dealer, car, kind) {
+  try {
+    const k = 'mn_tap_' + kind + '_' + (car || dealer), now = Date.now(), last = +(sessionStorage.getItem(k) || 0);
+    if (now - last < 60000) return; sessionStorage.setItem(k, String(now));
+  } catch (e) { }
+  fetch(SB_URL + '/rest/v1/rpc/log_contact', { method: 'POST', keepalive: true, headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ p_dealer: dealer, p_car: car, p_kind: kind }) }).catch(() => { });
 }
 async function sendEnquiry(e, id) {
   e.preventDefault(); const fm = e.target, c = S.cars.find(x => x.id === id), b = $('button', fm);
@@ -686,8 +694,8 @@ async function viewDealer(slug) {
   if (!d) { app().innerHTML = '<div class="wrap"><div class="empty" style="margin-top:30px"><b>Dealer not found</b><a class="btn" href="#/">Browse all cars</a></div></div>'; return; }
   const list = S.cars.filter(c => c.dealer_id === d.id).sort((a, b) => a.price - b.price), tel = String(d.phone || '').replace(/[^0-9+]/g, '');
   app().innerHTML = '<section class="dhead"><div class="wrap"><div class="in"><span class="mono">' + esc(initials(d.name)) + '</span><div><h1>' + esc(d.name) + '</h1><p>' + esc([d.address, d.town, d.postcode].filter(Boolean).join(', ')) + '</p></div>' +
-    '<div class="acts">' + (tel ? '<a class="btn" href="tel:' + esc(tel) + '">' + IC.phone + 'Call ' + esc(d.phone) + '</a>' : '') +
-    (d.website && /^https?:\/\//i.test(d.website) ? '<a class="btn ghost" target="_blank" rel="noopener" href="' + esc(d.website) + '">Visit website</a>' : '') + '</div></div>' +
+    '<div class="acts">' + (tel ? '<a class="btn" href="tel:' + esc(tel) + '" onclick="logTap(\'' + d.id + '\',null,\'call\')">' + IC.phone + 'Call ' + esc(d.phone) + '</a>' : '') +
+    (d.website && /^https?:\/\//i.test(d.website) ? '<a class="btn ghost" target="_blank" rel="noopener" href="' + esc(d.website) + '" onclick="logTap(\'' + d.id + '\',null,\'website\')">Visit website</a>' : '') + '</div></div>' +
     (d.about ? '<div class="about"><p>' + esc(d.about) + '</p></div>' : '') + '</div></section>' +
     '<div class="wrap"><div class="bar"><h2>' + list.length + ' car' + (list.length === 1 ? '' : 's') + ' in stock</h2></div>' +
     (list.length ? '<div class="cards">' + list.map(cardHtml).join('') + '</div>' : '<div class="empty"><b>No cars listed right now</b>Check back soon.</div>') + '</div>';
@@ -853,13 +861,21 @@ async function delPhoto(pid, btn) {
   btn.parentNode.remove(); S.cars = null;
 }
 async function tabEnq() {
-  const { data, error } = await sb.from('enquiries').select('*,car:cars!enquiries_car_id_fkey(make,model,year,reg)').eq('dealer_id', S.dealer.id).order('created_at', { ascending: false }).limit(300);
+  const d30 = new Date(Date.now() - 30 * 864e5).toISOString();
+  const [{ data, error }, t] = await Promise.all([sb.from('enquiries').select('*,car:cars!enquiries_car_id_fkey(make,model,year,reg)').eq('dealer_id', S.dealer.id).order('created_at', { ascending: false }).limit(300),
+    sb.from('contact_events').select('kind').eq('dealer_id', S.dealer.id).gte('created_at', d30).limit(20000)]);
   if (error) throw error;
-  $('#tab').innerHTML = data.length ? data.map(enqRow).join('') : '<div class="center">No enquiries yet. They will appear here as soon as a customer sends one.</div>';
+  const calls = (t.data || []).filter(x => x.kind === 'call').length, msgs = data.filter(x => x.created_at >= d30).length;
+  $('#tab').innerHTML = '<div class="kpis" style="margin-bottom:12px"><div class="kpi"><b>' + calls + '</b><span>Calls from MotorNest</span><small>last 30 days</small></div><div class="kpi"><b>' + msgs + '</b><span>Messages</span><small>last 30 days</small></div></div>' + (data.length ? data.map(enqRow).join('') : '<div class="center">No messages yet. They will appear here, and be emailed to you, as soon as a customer sends one.</div>');
+}
+function enqMail(q) {
+  if (q.emailed_at) return '<div><small style="color:#1D6B47">✓ Emailed to ' + esc(q.emailed_to) + '</small></div>';
+  if (q.email_error) return '<div><small class="muted">Not emailed: ' + esc(q.email_error) + '</small></div>';
+  return '';
 }
 function enqRow(q) {
   return '<div class="row"><div class="info"><b>' + esc(q.name) + ' <span class="badge ' + esc(q.status) + '">' + esc(q.status) + '</span></b><small>' + (q.car ? esc(title(q.car)) + (q.car.reg ? ' · ' + esc(q.car.reg) : '') : 'Car removed') + (q.dealer ? ' · ' + esc(q.dealer.name) : '') + ' · ' + new Date(q.created_at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) + '</small>' +
-    '<div>' + (q.phone ? '<a href="tel:' + esc(q.phone.replace(/[^0-9+]/g, '')) + '">' + esc(q.phone) + '</a> ' : '') + (q.email ? '<a href="mailto:' + esc(q.email) + '">' + esc(q.email) + '</a>' : '') + '</div>' + (q.message ? '<div style="white-space:pre-wrap;margin-top:4px">' + esc(q.message) + '</div>' : '') + '</div>' +
+    '<div>' + (q.phone ? '<a href="tel:' + esc(q.phone.replace(/[^0-9+]/g, '')) + '">' + esc(q.phone) + '</a> ' : '') + (q.email ? '<a href="mailto:' + esc(q.email) + '">' + esc(q.email) + '</a>' : '') + '</div>' + (q.message ? '<div style="white-space:pre-wrap;margin-top:4px">' + esc(q.message) + '</div>' : '') + enqMail(q) + '</div>' +
     '<div class="acts"><select onchange="enqStatus(\'' + q.id + '\',this.value)" style="width:auto">' + ['new', 'contacted', 'closed'].map(s => '<option' + (q.status === s ? ' selected' : '') + '>' + s + '</option>').join('') + '</select></div></div>';
 }
 async function enqStatus(id, st) { const { error } = await sb.from('enquiries').update({ status: st }).eq('id', id); if (error) return fail(error); toast('Updated'); }
@@ -1010,7 +1026,7 @@ function since(t) {
 }
 async function boLoad() {
   const d30 = new Date(Date.now() - 30 * 864e5).toISOString();
-  const [d, c, e, f, b, i, a, r] = await Promise.all([
+  const [d, c, e, f, b, i, a, r, t] = await Promise.all([
     sb.from('dealers').select('*').order('name'),
     sb.from('cars').select('dealer_id,status,price,sold_at').limit(5000),
     sb.from('enquiries').select('dealer_id,created_at').gte('created_at', d30).limit(5000),
@@ -1019,17 +1035,18 @@ async function boLoad() {
     sb.from('dealer_invites').select('*'),
     sb.from('dealer_applications').select('id,status'),
     sb.from('feed_runs').select('dealer_id,ran_at,note').order('ran_at', { ascending: false }).limit(300),
+    sb.from('contact_events').select('dealer_id,kind').gte('created_at', d30).limit(20000),
   ]);
-  for (const x of [d, c, e, f, b, i, a, r]) if (x.error) throw x.error;
+  for (const x of [d, c, e, f, b, i, a, r, t]) if (x.error) throw x.error;
   const by = (rows, k = 'dealer_id') => { const m = {}; for (const x of rows) (m[x[k]] = m[x[k]] || []).push(x); return m; };
-  const cars = by(c.data), enq = by(e.data), feeds = Object.fromEntries(f.data.map(x => [x.dealer_id, x])), bill = Object.fromEntries(b.data.map(x => [x.dealer_id, x])), inv = by(i.data), runs = by(r.data);
+  const cars = by(c.data), enq = by(e.data), taps = by(t.data), feeds = Object.fromEntries(f.data.map(x => [x.dealer_id, x])), bill = Object.fromEntries(b.data.map(x => [x.dealer_id, x])), inv = by(i.data), runs = by(r.data);
   S.allDealers = d.data;
   S.bo = d.data.map(x => {
     const cs = cars[x.id] || [], live = cs.filter(y => y.status === 'live'), fd = feeds[x.id] || {}, last = (runs[x.id] || [])[0];
     return {
       d: x, live: live.length, value: live.reduce((s, y) => s + (y.price || 0), 0),
       sold30: cs.filter(y => y.status === 'sold' && y.sold_at && y.sold_at >= d30).length,
-      enq30: (enq[x.id] || []).length, feed: fd, bill: bill[x.id] || { monthly_fee: 0, plan: 'free' }, inv: inv[x.id] || [],
+      enq30: (enq[x.id] || []).length, calls30: (taps[x.id] || []).filter(y => y.kind === 'call').length, web30: (taps[x.id] || []).filter(y => y.kind === 'website').length, feed: fd, bill: bill[x.id] || { monthly_fee: 0, plan: 'free' }, inv: inv[x.id] || [],
       problem: last && /^Failed/.test(last.note || '') ? last.note : null,
       link: fd.site_url ? 'Website' : fd.feed_url ? 'Feed link' : fd.key_hint ? 'Push feed' : 'Manual',
     };
@@ -1054,21 +1071,23 @@ async function boHome() {
     else if (x.link !== 'Manual' && x.feed.last_sync_at && Date.now() - new Date(x.feed.last_sync_at) > 3 * 3600e3) issues.push([x, 'Stock not updated since ' + since(x.feed.last_sync_at)]);
     if (!x.live) issues.push([x, 'No cars on show']);
   }
+  const noMail = act.filter(x => !x.bill.lead_email && !x.d.email);
+  if (noMail.length) issues.push([noMail.length === 1 ? noMail[0] : null, noMail.length === 1 ? 'No email to send their leads to. Open it and fill in "Send leads to"' : noMail.length + ' dealerships have no email for their leads: ' + noMail.map(x => x.d.name).join(', ') + '. Open each one and fill in "Send leads to"', 'dealers']);
   if (S.boApps) issues.unshift([null, S.boApps + ' new dealership application' + (S.boApps > 1 ? 's' : '') + ' waiting']);
   const top = act.slice().sort((p, q) => q.live - p.live);
   $('#tab').innerHTML =
     '<div class="kpis">' +
       kpi(act.length, 'Dealerships live', L.length - act.length ? (L.length - act.length) + ' suspended or hidden' : '') +
       kpi(sum('live').toLocaleString('en-GB'), 'Cars for sale', gbp(sum('value')) + ' of stock') +
-      kpi(sum('enq30'), 'Enquiries', 'last 30 days') +
+      kpi(sum('calls30') + sum('enq30'), 'Leads', sum('calls30') + ' calls · ' + sum('enq30') + ' messages · 30 days') +
       kpi(gbp(income), 'Monthly income', paying ? paying + ' paying dealership' + (paying > 1 ? 's' : '') : 'Everyone is free for now') +
     '</div>' +
     '<h3 class="bohead">Needs your attention</h3>' +
-    (issues.length ? issues.map(([x, t]) => '<div class="row"><div class="info"><b>' + (x ? esc(x.d.name) : 'Applications') + '</b><small>' + esc(t) + '</small></div><div class="acts">' +
-      (x ? '<button class="btn ghost sm" onclick="boOpen(\'' + x.d.id + '\')">Open</button>' : '<button class="btn ghost sm" onclick="S.atab=\'apps\';viewAdmin()">Review</button>') + '</div></div>').join('')
+    (issues.length ? issues.map(([x, t, t3]) => '<div class="row"><div class="info"><b>' + (x ? esc(x.d.name) : t3 === 'dealers' ? 'Lead emails' : 'Applications') + '</b><small>' + esc(t) + '</small></div><div class="acts">' +
+      (x ? '<button class="btn ghost sm" onclick="boOpen(\'' + x.d.id + '\')">Open</button>' : '<button class="btn ghost sm" onclick="S.atab=\'' + (t3 || 'apps') + '\';viewAdmin()">' + (t3 ? 'Open' : 'Review') + '</button>') + '</div></div>').join('')
       : '<div class="row"><div class="info"><b>All good</b><small>Every dealership is updating and has cars on show.</small></div></div>') +
-    '<h3 class="bohead">Dealerships</h3><div class="botable"><div class="bt hd"><span>Dealership</span><span>Cars</span><span>Enquiries (30 days)</span><span>Stock updated</span><span>Plan</span></div>' +
-    top.map(x => '<div class="bt" onclick="boOpen(\'' + x.d.id + '\')"><span><b>' + esc(x.d.name) + '</b><small>' + esc(x.d.town || '') + '</small></span><span>' + x.live + '</span><span>' + x.enq30 + '</span><span>' + (x.link === 'Manual' ? 'Added by hand' : since(x.feed.last_sync_at)) + '</span><span>' + planBadge(x.bill) + '</span></div>').join('') + '</div>';
+    '<h3 class="bohead">Dealerships</h3><div class="botable"><div class="bt hd"><span>Dealership</span><span>Cars</span><span>Leads (30 days)</span><span>Stock updated</span><span>Plan</span></div>' +
+    top.map(x => '<div class="bt" onclick="boOpen(\'' + x.d.id + '\')"><span><b>' + esc(x.d.name) + '</b><small>' + esc(x.d.town || '') + '</small></span><span>' + x.live + '</span><span>' + x.calls30 + ' calls · ' + x.enq30 + ' msgs</span><span>' + (x.link === 'Manual' ? 'Added by hand' : since(x.feed.last_sync_at)) + '</span><span>' + planBadge(x.bill) + '</span></div>').join('') + '</div>';
 }
 function boOpen(id) { S.boOpen = id; S.atab = 'dealers'; viewAdmin(); }
 
@@ -1089,7 +1108,7 @@ function boCard(x) {
   const d = x.d, b = x.bill, id = d.id, f = (k, l, t) => '<div><label>' + l + '</label><input name="' + k + '" type="' + (t || 'text') + '" value="' + esc(d[k] || '') + '"></div>';
   return '<div class="dl" id="dl-' + id + '">' +
     '<div class="dltop" onclick="this.parentNode.classList.toggle(\'open\')"><div class="info"><b>' + esc(d.name) + ' <span class="badge ' + esc(d.status) + '">' + (d.status === 'approved' ? 'live' : esc(d.status)) + '</span> ' + planBadge(b) + (d.is_demo ? ' <span class="badge draft">demo</span>' : '') + '</b>' +
-      '<small>' + x.live + ' cars · ' + x.enq30 + ' enquiries in 30 days · ' + x.sold30 + ' sold in 30 days · stock: ' + (x.link === 'Manual' ? 'added by hand' : x.link.toLowerCase() + ', updated ' + since(x.feed.last_sync_at)) + '</small>' +
+      '<small>' + x.live + ' cars · ' + x.calls30 + ' calls and ' + x.enq30 + ' messages in 30 days · ' + x.sold30 + ' sold in 30 days · stock: ' + (x.link === 'Manual' ? 'added by hand' : x.link.toLowerCase() + ', updated ' + since(x.feed.last_sync_at)) + '</small>' +
       (x.problem ? '<div class="err" style="margin-top:4px">' + esc(x.problem) + '</div>' : '') + '</div><span class="chev">›</span></div>' +
     '<div class="dlbody">' +
       '<form class="panel" onsubmit="return boSaveBilling(event,\'' + id + '\')"><h3>Monthly payment</h3>' +
@@ -1098,7 +1117,7 @@ function boCard(x) {
         '<div><label>Paying from</label><input name="starts" type="date" value="' + esc(b.starts_on || '') + '"></div></div>' +
         '<div style="margin-top:10px"><label>Private notes (only you see these)</label><textarea name="notes" maxlength="2000" placeholder="e.g. agreed £99 a month from January, contact Ali">' + esc(b.notes || '') + '</textarea></div>' +
         '<button class="btn" style="margin-top:10px">Save payment</button></form>' +
-      '<form class="panel" onsubmit="return boSaveDealer(event,\'' + id + '\')"><h3>Dealership details</h3><div class="grid g3">' + f('name', 'Name') + f('phone', 'Phone', 'tel') + f('email', 'Email', 'email') + f('website', 'Website') + f('address', 'Address') + f('town', 'Town') + f('postcode', 'Postcode') + '</div>' +
+      '<form class="panel" onsubmit="return boSaveDealer(event,\'' + id + '\')"><h3>Dealership details</h3><div class="grid g3">' + f('name', 'Name') + f('phone', 'Phone', 'tel') + f('email', 'Email', 'email') + f('website', 'Website') + f('address', 'Address') + f('town', 'Town') + f('postcode', 'Postcode') + '<div><label>Send leads to (private email)</label><input name="lead_email" type="email" value="' + esc(b.lead_email || '') + '" placeholder="where enquiries are emailed"></div></div>' +
         '<div style="margin-top:10px"><label>About</label><textarea name="about" maxlength="3000">' + esc(d.about || '') + '</textarea></div><button class="btn" style="margin-top:10px">Save details</button></form>' +
       '<div class="panel"><h3>Stock</h3><p class="muted" style="margin:0 0 10px">' + (x.feed.site_url ? 'Reads cars from <b>' + esc(x.feed.site_url) + '</b> every hour.' : x.feed.feed_url ? 'Reads cars from a feed link every hour.' : 'Cars are added by hand or by spreadsheet.') +
         ' Logins: ' + (x.inv.map(v => esc(v.email) + (v.claimed_at ? ' ✓' : ' (not signed up yet)')).join(', ') || 'none') + '</p><div class="acts">' +
@@ -1123,6 +1142,8 @@ async function boSaveDealer(e, id) {
   if (u.postcode && u.postcode !== old.postcode) { const g = await geocode(u.postcode); if (g) { u.lat = g.lat; u.lng = g.lng; } else toast('Postcode not recognised'); }
   const { error } = await sb.from('dealers').update(u).eq('id', id);
   if (error) { fail(error); return false; }
+  const le = fm.lead_email.value.trim() || null, r2 = await sb.from('dealer_billing').upsert({ dealer_id: id, lead_email: le });
+  if (r2.error) { fail(r2.error); return false; }
   S.cars = null; toast('Details saved'); S.boOpen = id; adDealers(); return false;
 }
 async function boSync(id, btn) {
