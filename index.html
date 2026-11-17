@@ -87,6 +87,49 @@ select:disabled{background-color:#F6F7F9;color:#9AA6B2}
 .btn.danger{background:#fff;border:1.5px solid #EBC7C3;color:var(--bad)}
 .btn[disabled]{opacity:.55;cursor:wait}
 
+
+/* hero photo show: real cars from the stock, fading one into the next */
+.herobg{position:absolute;inset:0;overflow:hidden;z-index:0}
+.herobg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.6s ease;transform:scale(1.04)}
+.herobg img.on{opacity:1}
+.herobg:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(19,32,46,.94) 0%,rgba(19,32,46,.78) 45%,rgba(19,32,46,.35) 100%),linear-gradient(0deg,rgba(19,32,46,1) 0%,rgba(19,32,46,0) 40%)}
+@media(max-width:760px){.herobg:after{background:linear-gradient(180deg,rgba(19,32,46,.72) 0%,rgba(19,32,46,.86) 60%,rgba(19,32,46,1) 100%)}}
+.featured{position:absolute;right:24px;bottom:130px;z-index:2;display:none;align-items:center;gap:12px;background:rgba(19,32,46,.72);backdrop-filter:blur(6px);color:#fff;text-decoration:none;padding:10px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.12);max-width:340px}
+@media(min-width:960px){.featured{display:flex}}
+.featured b{display:block;font-family:var(--display);font-size:17px;letter-spacing:-.01em}
+.featured small{color:#C9D3DE}
+.featured .fp{margin-left:auto;background:var(--straw);color:var(--ink);font-family:var(--display);font-weight:800;padding:4px 10px;border-radius:9px;white-space:nowrap}
+.featured:hover b{text-decoration:underline}
+
+/* swipeable rails */
+.rail{margin-top:34px}
+.railhead{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:12px}
+.railhead h2{font-size:clamp(22px,3vw,28px);font-weight:700}
+.railhead p{margin:4px 0 0;color:var(--mute);font-size:15px}
+.seeall{flex:none;background:none;border:0;font:inherit;font-weight:700;color:var(--ink);text-decoration:underline;text-decoration-color:var(--straw);text-decoration-thickness:2px;text-underline-offset:4px;cursor:pointer;padding:6px 0}
+.railtrack{display:grid;grid-auto-flow:column;grid-auto-columns:78%;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 10px;scrollbar-width:none;margin:0 -18px;padding-left:18px;padding-right:18px;scroll-padding-left:18px}
+.railtrack::-webkit-scrollbar{display:none}
+.railtrack .car{scroll-snap-align:start}
+@media(min-width:600px){.railtrack{grid-auto-columns:44%}}
+@media(min-width:980px){.railtrack{grid-auto-columns:calc((100% - 42px)/3.4);margin:0;padding-left:2px;padding-right:2px}}
+
+/* save heart */
+.heart{position:absolute;left:10px;top:10px;width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:var(--ink);display:grid;place-items:center;cursor:pointer;box-shadow:0 2px 8px rgba(19,32,46,.2);z-index:2}
+.heart svg{width:20px;height:20px}
+.heart.on{color:#D2453B}
+.heart.on svg path{fill:currentColor}
+.heart:active{transform:scale(.92)}
+nav a .savedn{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--straw);color:var(--ink);font-size:12px;margin-left:5px}
+
+/* car page extras */
+.stickybar{position:fixed;left:0;right:0;bottom:0;z-index:25;background:#fff;border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:10px;box-shadow:0 -8px 24px -12px rgba(19,32,46,.35)}
+.stickybar .p{font-family:var(--display);font-weight:800;font-size:24px;letter-spacing:-.02em;margin-right:auto}
+.stickybar .btn{padding:11px 14px}
+@media(min-width:960px){.stickybar{display:none}}
+body.has-sticky{padding-bottom:78px}
+@media(min-width:960px){body.has-sticky{padding-bottom:0}}
+.morecars{margin-top:10px}
+
 /* body-type shortcuts */
 .shortcuts{display:flex;gap:8px;overflow-x:auto;padding:58px 0 4px;scrollbar-width:none}
 .shortcuts::-webkit-scrollbar{display:none}
@@ -252,6 +295,8 @@ footer a:hover{color:#fff}
 .portalhead h2{font-size:26px}
 #toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:12px;font-weight:600;font-size:15px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;max-width:90vw}
 #toast.on{opacity:1}
+body.has-sticky #toast{bottom:96px}
+@media(min-width:960px){body.has-sticky #toast{bottom:22px}}
 pre.code{background:var(--ink);color:#D8E2F3;padding:12px;border-radius:12px;overflow:auto;font-size:12px}
 .joinhero{padding:40px 0 34px}
 .joinhero h1{font-size:clamp(32px,5.4vw,56px);font-weight:800;max-width:16ch}
@@ -365,6 +410,7 @@ function img(c, cls) {
 }
 function nav() {
   let h = '<a class="hm" href="#/">Find a car</a><a class="hm" href="#/#dealers">Dealers</a>';
+  if (S.fav && S.fav.size) h += '<a href="#/saved">Saved<span class="savedn">' + S.fav.size + '</span></a>';
   if (S.isAdmin) h += '<a href="#/admin">Admin</a>';
   h += '<a href="#/portal">' + (S.user ? 'My portal' : 'Dealer login') + '</a>';
   if (S.user) h += '<a href="#" onclick="signOut();return false">Sign out</a>';
@@ -375,13 +421,74 @@ function cardHtml(c) {
   const p = c.photos && c.photos[0];
   return '<a class="car" href="#/car/' + c.id + '"><div class="pic">' +
     (p ? '<img loading="lazy" alt="' + esc(title(c)) + '" src="' + esc(photoUrl(p.path)) + '">' : '<div class="ph">Photo coming soon</div>') +
-    '<span class="price">' + money(c.price) + '</span>' +
+    '<span class="price">' + money(c.price) + '</span>' + heartBtn(c.id) +
     (c.photos.length > 1 ? '<span class="count">' + IC.cam + c.photos.length + '</span>' : '') + '</div>' +
     '<div class="b"><h3>' + esc(title(c)) + '</h3>' + (c.variant ? '<div class="v">' + esc(c.variant) + '</div>' : '') +
     '<div class="specs">' + (c.mileage != null ? '<span>' + IC.road + num(c.mileage) + ' mi</span>' : '') +
     (c.fuel ? '<span>' + IC.fuel + esc(c.fuel) + '</span>' : '') + (c.gearbox ? '<span>' + IC.gear + esc(c.gearbox) + '</span>' : '') + '</div>' +
     '<div class="loc">' + IC.pin + '<span><b>' + esc(c.dealer.name) + '</b>, ' + esc(c.dealer.town || '') +
     (c.dist != null ? ' (' + c.dist.toFixed(c.dist < 10 ? 1 : 0) + ' mi)' : '') + '</span></div></div></a>';
+}
+
+
+// ---------- saved cars + recently viewed (kept in this browser only) ----------
+function store(k, v) { try { if (v === undefined) return JSON.parse(localStorage.getItem(k) || '[]'); localStorage.setItem(k, JSON.stringify(v)); } catch (e) { return []; } }
+S.fav = new Set(store('mn_fav'));
+const HEART = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20s-7.5-4.6-9.2-9.4C1.6 7.2 3.8 4 7.2 4c2 0 3.6 1.1 4.8 2.8C13.2 5.1 14.8 4 16.8 4c3.4 0 5.6 3.2 4.4 6.6C19.5 15.4 12 20 12 20z"/></svg>';
+function heartBtn(id) { const on = S.fav.has(id); return '<button class="heart' + (on ? ' on' : '') + '" aria-pressed="' + on + '" aria-label="' + (on ? 'Remove from saved' : 'Save this car') + '" onclick="toggleFav(event,\'' + id + '\')">' + HEART + '</button>'; }
+function toggleFav(e, id) {
+  e.preventDefault(); e.stopPropagation();
+  if (S.fav.has(id)) S.fav.delete(id); else S.fav.add(id);
+  store('mn_fav', [...S.fav]);
+  document.querySelectorAll('.heart[onclick*="' + id + '"]').forEach(b => { const on = S.fav.has(id); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); b.setAttribute('aria-label', on ? 'Remove from saved' : 'Save this car'); });
+  toast(S.fav.has(id) ? 'Saved. Find it under Saved at the top.' : 'Removed from saved');
+  nav();
+}
+function seen(id) { const l = store('mn_seen').filter(x => x !== id); l.unshift(id); store('mn_seen', l.slice(0, 12)); }
+function railHtml(title, sub, list, seeAll) {
+  if (list.length < 3) return '';
+  return '<section class="rail"><div class="railhead"><div><h2>' + title + '</h2>' + (sub ? '<p>' + sub + '</p>' : '') + '</div>' +
+    (seeAll ? '<button class="seeall" onclick="' + seeAll + '">See all</button>' : '') + '</div><div class="railtrack">' + list.slice(0, 12).map(cardHtml).join('') + '</div></section>';
+}
+function seeAll(k, v, sort) { S.f = { sort: sort || '' }; if (k) S.f[k] = v; S.shown = 24; renderSearch(); renderResults(); $('#results').scrollIntoView({ behavior: 'smooth' }); }
+function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function startHeroShow() {
+  clearInterval(S.heroT);
+  const box = $('#herobg'); if (!box) return;
+  const picks = shuffle(S.cars.filter(c => c.photos.length >= 3 && c.price >= 3000)).slice(0, 6);
+  if (!picks.length) return;
+  box.innerHTML = picks.map((c, i) => '<img alt="" ' + (i ? 'loading="lazy" ' : '') + 'src="' + esc(photoUrl(c.photos[0].path)) + '"' + (i ? '' : ' class="on"') + '>').join('');
+  const feat = $('#featured');
+  const show = (i) => { const c = picks[i]; if (feat) { feat.href = '#/car/' + c.id; feat.innerHTML = '<span><b>' + esc(title(c)) + '</b><small>' + esc(c.dealer.name) + '</small></span><span class="fp">' + money(c.price) + '</span>'; } };
+  show(0);
+  if (picks.length < 2 || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  let i = 0;
+  S.heroT = setInterval(() => {
+    if (!document.body.contains(box)) { clearInterval(S.heroT); return; }
+    const imgs = box.querySelectorAll('img'); imgs[i].classList.remove('on'); i = (i + 1) % imgs.length; imgs[i].classList.add('on'); show(i);
+  }, 5000);
+}
+function renderRails() {
+  const el = $('#rails'); if (!el) return;
+  const noFilters = !Object.keys(FILTER_NAMES).some(k => S.f[k]) && S.origin === SHEFFIELD;
+  if (!noFilters) { el.innerHTML = ''; return; }
+  const by = (fn) => S.cars.filter(fn);
+  const seenIds = store('mn_seen'), seenCars = seenIds.map(id => S.cars.find(c => c.id === id)).filter(Boolean);
+  el.innerHTML =
+    (seenCars.length >= 3 ? railHtml('Pick up where you left off', 'Cars you looked at recently.', seenCars) : '') +
+    railHtml('Just arrived', 'The newest cars on MotorNest.', S.cars.slice().sort((a, b) => (a.created_at < b.created_at ? 1 : -1)), "seeAll('', '', 'new')") +
+    railHtml('Under £5,000', 'Great first cars and runarounds.', shuffle(by(c => c.price > 0 && c.price <= 5000)), "seeAll('pmax','5000','plo')") +
+    railHtml('Family SUVs', 'Room for everyone and the shopping.', shuffle(by(c => c.body_type === 'SUV')), "seeAll('body','SUV')") +
+    railHtml('Low mileage', 'Under 50,000 miles on the clock.', shuffle(by(c => c.mileage != null && c.mileage < 50000)), "seeAll('miles','60000','mil')") +
+    railHtml('Automatics', 'No clutch, easy town driving.', shuffle(by(c => c.gearbox === 'Automatic')), "seeAll('gear','Automatic')");
+}
+function viewSaved() {
+  loadCars().then(() => {
+    const list = [...S.fav].map(id => S.cars.find(c => c.id === id)).filter(Boolean);
+    app().innerHTML = '<div class="wrap"><div class="bar"><h2>Saved cars</h2></div>' +
+      (list.length ? '<div class="cards">' + list.map(cardHtml).join('') + '</div>' : '<div class="empty"><b>No saved cars yet</b>Tap the heart on any car to keep it here.<br><br><a class="btn" href="#/">Browse cars</a></div>') + '</div>';
+    window.scrollTo(0, 0);
+  }).catch(fail);
 }
 
 // ---------- customer site ----------
@@ -399,9 +506,9 @@ const NEST_SVG = '<svg class="nest" viewBox="0 0 1000 200" preserveAspectRatio="
   '</svg>';
 
 async function viewHome() {
-  app().innerHTML = '<section class="hero"><div class="wrap"><h1>Find your next car from Sheffield\'s local dealers</h1>' +
-    '<p class="lede" id="lede">Loading the latest stock…</p></div></section>' +
-    '<div class="wrap"><div class="nestwrap">' + NEST_SVG + '<div class="searchbox" id="search"></div></div><div class="shortcuts" id="shortcuts"></div><div id="results"><div class="center">Loading cars…</div></div>' +
+  app().innerHTML = '<section class="hero"><div class="herobg" id="herobg"></div><div class="wrap"><h1>Find your next car from Sheffield\'s local dealers</h1>' +
+    '<p class="lede" id="lede">Loading the latest stock…</p></div><a class="featured" id="featured" href="#/"></a></section>' +
+    '<div class="wrap"><div class="nestwrap">' + NEST_SVG + '<div class="searchbox" id="search"></div></div><div class="shortcuts" id="shortcuts"></div><div id="rails"></div><div id="results"><div class="center">Loading cars…</div></div>' +
     '<section class="section" id="dealers"></section>' +
     '<section class="sellband"><div><h2>Sell cars around Sheffield? List them here.</h2><p>Your stock goes live on MotorNest and stays in step with your own website, so there is nothing extra to keep up to date.</p><a class="btn dark" href="#/join">Apply to list your stock</a></div>' +
     '<ul><li>' + IC.tick + 'Cars copied from your website every hour</li><li>' + IC.tick + 'Sold cars come down automatically</li><li>' + IC.tick + 'Enquiries go straight to you</li><li>' + IC.tick + 'Your own dealer page with every car</li></ul></section></div>';
@@ -409,7 +516,7 @@ async function viewHome() {
   const dealers = {}; S.cars.forEach(c => { (dealers[c.dealer_id] = dealers[c.dealer_id] || { d: c.dealer, n: 0 }).n++; });
   const dl = Object.values(dealers).sort((a, b) => b.n - a.n);
   $('#lede').innerHTML = '<strong>' + num(S.cars.length) + ' cars</strong> for sale right now from <strong>' + dl.length + ' independent dealers</strong> in and around Sheffield.';
-  renderSearch(); renderShortcuts(); renderResults();
+  renderSearch(); renderShortcuts(); renderResults(); startHeroShow();
   $('#dealers').innerHTML = '<h2>The dealers on MotorNest</h2><p class="sub">Local, independent forecourts. Tap one to see everything they have in stock.</p><div class="dealers">' +
     dl.map(x => '<a class="dealer" href="#/dealer/' + esc(x.d.slug) + '"><span class="mono">' + esc(initials(x.d.name)) + '</span><span><b>' + esc(x.d.name) + '</b><small>' + esc(x.d.town || '') + '</small></span><span class="n">' + x.n + '<small>cars</small></span></a>').join('') + '</div>';
   if (location.hash === '#/#dealers' || S.jumpDealers) { S.jumpDealers = false; $('#dealers').scrollIntoView(); }
@@ -474,11 +581,12 @@ function renderResults() {
   if (s === 'mil') list.sort((a, b) => (a.mileage ?? 9e9) - (b.mileage ?? 9e9));
   if (s === 'near') list.sort((a, b) => (a.dist ?? 9e9) - (b.dist ?? 9e9));
   if (s === 'new') list.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+  renderRails();
   const go = $('#gobtn'); if (go) go.textContent = list.length ? 'Show ' + num(list.length) + ' car' + (list.length === 1 ? '' : 's') : 'No matches';
   renderShortcuts();
   const shown = S.shown || 24;
   const active = Object.keys(FILTER_NAMES).filter(k => f[k]);
-  $('#results').innerHTML = '<div class="bar"><h2>' + num(list.length) + ' car' + (list.length === 1 ? '' : 's') + (S.origin !== SHEFFIELD ? ' near ' + esc(S.origin.label) : '') + '</h2>' +
+  $('#results').innerHTML = '<div class="bar" style="margin-top:44px"><h2>' + (active.length ? '' : 'All ') + num(list.length) + ' car' + (list.length === 1 ? '' : 's') + (S.origin !== SHEFFIELD ? ' near ' + esc(S.origin.label) : '') + '</h2>' +
     '<select class="sortsel" aria-label="Sort cars" onchange="setF(\'sort\',this.value)">' + [['mix', 'Recommended'], ['plo', 'Lowest price'], ['phi', 'Highest price'], ['mil', 'Lowest mileage'], ['near', 'Nearest to you'], ['new', 'Newest listed']].map(o => '<option value="' + o[0] + '"' + (s === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></div>' +
     (active.length ? '<div class="active-filters">' + active.map(k => '<button class="afl" onclick="clearF(\'' + k + '\')" aria-label="Remove filter">' + esc(FILTER_NAMES[k](f[k])) + '<span>✕</span></button>').join('') + '</div>' : '') +
     (list.length ? '<div class="cards">' + list.slice(0, shown).map(cardHtml).join('') + '</div>' +
@@ -493,9 +601,11 @@ async function viewCar(id) {
   if (!c) { app().innerHTML = '<div class="wrap"><div class="empty" style="margin-top:30px"><b>This car has been sold or taken off sale</b>There are plenty more like it.<br><br><a class="btn" href="#/">Browse all cars</a></div></div>'; return; }
   const d = c.dealer, tel = String(d.phone || '').replace(/[^0-9+]/g, '');
   const sp = (l, v) => v == null || v === '' ? '' : '<div><dt>' + l + '</dt><dd>' + esc(v) + '</dd></div>';
-  S.gal = { list: c.photos.map(p => photoUrl(p.path)), i: 0 };
+  S.gal = { list: c.photos.map(p => photoUrl(p.path)), i: 0 }; seen(c.id);
+  const alike = S.cars.filter(x => x.id !== c.id && x.body_type === c.body_type && x.price > 0 && Math.abs(x.price - c.price) <= Math.max(1500, c.price * 0.35)).sort((a, b) => Math.abs(a.price - c.price) - Math.abs(b.price - c.price));
+  const fromDealer = S.cars.filter(x => x.id !== c.id && x.dealer_id === c.dealer_id);
   app().innerHTML = '<div class="wrap"><a class="crumb" href="#/">' + IC.left.replace('<svg', '<svg width="16" height="16"') + 'All cars</a><div class="detail"><div>' +
-    (S.gal.list.length ? '<div class="gal"><img class="main" id="gmain" alt="' + esc(title(c)) + '" src="' + esc(S.gal.list[0]) + '">' +
+    (S.gal.list.length ? '<div class="gal"><img class="main" id="gmain" alt="' + esc(title(c)) + '" src="' + esc(S.gal.list[0]) + '">' + heartBtn(c.id) +
       (S.gal.list.length > 1 ? '<button class="nav prev" aria-label="Previous photo" onclick="galGo(-1)">' + IC.left + '</button><button class="nav next" aria-label="Next photo" onclick="galGo(1)">' + IC.right + '</button><span class="ctr" id="gctr">1 / ' + S.gal.list.length + '</span>' : '') + '</div>' +
       (S.gal.list.length > 1 ? '<div class="thumbs" id="thumbs">' + S.gal.list.map((u, i) => '<button aria-label="Photo ' + (i + 1) + '" class="' + (i ? '' : 'on') + '" onclick="galGo(0,' + i + ')"><img loading="lazy" alt="" src="' + esc(u) + '"></button>').join('') + '</div>' : '')
       : '<div class="gal"><div class="ph">Photos coming soon</div></div>') +
@@ -515,7 +625,11 @@ async function viewCar(id) {
     '<div class="f"><label for="en">Your name</label><input id="en" name="name" required maxlength="120" autocomplete="name"></div>' +
     '<div class="row2 f"><div><label for="ep">Phone</label><input id="ep" name="phone" type="tel" maxlength="40" autocomplete="tel"></div><div><label for="ee">Email</label><input id="ee" name="email" type="email" maxlength="200" autocomplete="email"></div></div>' +
     '<div class="f"><label for="em">Message</label><textarea id="em" name="message" maxlength="2000">Hi, is the ' + esc(title(c)) + ' still available?</textarea></div>' +
-    '<button class="btn dark" style="width:100%">Send to ' + esc(d.name) + '</button><div class="err" id="enqerr"></div></form></aside></div></div>';
+    '<button class="btn dark" style="width:100%">Send to ' + esc(d.name) + '</button><div class="err" id="enqerr"></div></form></aside></div>' +
+    '<div class="morecars">' + railHtml('More cars like this', 'Similar body style and price.', shuffle(alike.slice(0, 12))) + railHtml('More from ' + esc(d.name), '', shuffle(fromDealer)) + '</div></div>' +
+    '<div class="stickybar"><span class="p">' + money(c.price) + '</span>' + (tel ? '<a class="btn dark" href="tel:' + esc(tel) + '">' + IC.phone + 'Call</a>' : '') +
+    '<button class="btn" onclick="document.querySelector(\'.enq\').scrollIntoView({behavior:\'smooth\'});setTimeout(()=>document.getElementById(\'en\').focus(),400)">Message</button></div>';
+  document.body.classList.add('has-sticky');
   window.scrollTo(0, 0);
 }
 function galGo(step, to) {
@@ -915,8 +1029,10 @@ async function adEnq() {
 function route() {
   const h = location.hash.replace(/^#\/?/, ''), i = h.indexOf('/'), p = i < 0 ? h : h.slice(0, i), a = i < 0 ? '' : h.slice(i + 1);
   nav();
+  if (p !== 'car') document.body.classList.remove('has-sticky');
   if (p === 'car' && a) return viewCar(a);
   if (p === 'dealer' && a) return viewDealer(decodeURIComponent(a));
+  if (p === 'saved') return viewSaved();
   if (p === 'join') return viewJoin();
   if (p === 'portal') return viewPortal();
   if (p === 'admin') return viewAdmin();
