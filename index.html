@@ -5,105 +5,265 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>MotorNest | Used cars from trusted Sheffield dealers</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--ink:#0e1a2b;--ink2:#1b2c44;--mut:#62708a;--line:#e3e7ee;--bg:#f5f6f8;--card:#fff;--acc:#f5a524;--acc2:#d98a06;--ok:#0e9f6e;--bad:#d64545;--r:14px}
+:root{
+  --ink:#13202E;--ink2:#1D3044;--straw:#E8B04B;--straw-deep:#B9821C;--straw-soft:#FBEFD3;
+  --paper:#F3F5F7;--card:#fff;--line:#DFE4EA;--mute:#5D6B7A;--sky:#DCE6EE;--go:#2F7D5B;--bad:#C4423A;
+  --display:"Bricolage Grotesque","Figtree",system-ui,sans-serif;--body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
 *{box-sizing:border-box}
-body{margin:0;font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.45;-webkit-font-smoothing:antialiased}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{overflow-x:hidden}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{margin:0;font-family:var(--body);font-size:16px;line-height:1.5;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased}
 a{color:inherit}
-.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
-header.top{background:var(--ink);color:#fff;position:sticky;top:0;z-index:20}
-header.top .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
-.logo{font-weight:800;font-size:22px;letter-spacing:-.5px;text-decoration:none;display:flex;align-items:center;gap:8px}
-.logo span{color:var(--acc)}
-.logo svg{width:28px;height:28px}
-nav{display:flex;align-items:center;white-space:nowrap}
-nav a{color:#d5dcea;text-decoration:none;font-weight:600;font-size:14px;margin-left:16px}
-@media(max-width:560px){.logo{font-size:19px}.logo svg{width:24px;height:24px}nav a{font-size:13px;margin-left:11px}nav a.hm{display:none}}
-nav a:hover{color:#fff}
-.hero{background:linear-gradient(160deg,var(--ink) 0%,var(--ink2) 70%,#27405f 100%);color:#fff;padding:34px 0 70px}
-.hero h1{font-size:clamp(26px,5vw,44px);margin:0 0 6px;letter-spacing:-1px;font-weight:800}
-.hero h1 em{font-style:normal;color:var(--acc)}
-.hero p{margin:0;color:#c3cde0;font-size:16px}
-.panel{background:var(--card);border-radius:var(--r);box-shadow:0 8px 30px rgba(14,26,43,.10);padding:16px}
-.search{margin-top:-46px;position:relative}
+:focus-visible{outline:3px solid var(--straw);outline-offset:2px;border-radius:6px}
+.wrap{max-width:1200px;margin:0 auto;padding:0 18px}
+h1,h2,h3{font-family:var(--display);letter-spacing:-.02em;line-height:1.1;margin:0}
+
+/* header */
+header.top{background:var(--ink);color:#fff;position:sticky;top:0;z-index:30;border-bottom:1px solid rgba(255,255,255,.06)}
+header.top .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;gap:12px}
+.logo{display:flex;align-items:center;gap:9px;text-decoration:none;font-family:var(--display);font-weight:700;font-size:23px;letter-spacing:-.03em;color:#fff}
+.logo b{color:var(--straw);font-weight:700}
+.logo svg{width:34px;height:34px;flex:none}
+nav{display:flex;align-items:center;gap:6px;white-space:nowrap}
+nav a{color:#C9D3DE;text-decoration:none;font-weight:600;font-size:15px;padding:8px 10px;border-radius:8px}
+nav a:hover{color:#fff;background:rgba(255,255,255,.06)}
+nav a.cta{color:var(--ink);background:var(--straw);margin-left:4px}
+nav a.cta:hover{background:#F0C063;color:var(--ink)}
+@media(max-width:640px){.logo{font-size:20px}.logo svg{width:30px;height:30px}nav a{font-size:14px;padding:7px 8px}nav a.hm{display:none}}
+
+/* hero */
+.hero{background:var(--ink);color:#fff;position:relative;padding:44px 0 0}
+.hero .wrap{position:relative;z-index:2}
+.hero h1{font-size:clamp(34px,6.4vw,68px);font-weight:800;max-width:17ch;letter-spacing:-.035em}
+.hero p.lede{color:#B8C4D1;font-size:clamp(16px,2vw,19px);margin:16px 0 0;max-width:46ch}
+.hero p.lede strong{color:#fff;font-weight:700}
+.nestwrap{position:relative;max-width:1080px;margin:-96px auto 0;z-index:3}
+@media(max-width:640px){.nestwrap{margin-top:-64px}}
+.nest{position:absolute;left:-3.5%;right:-3.5%;top:38%;bottom:-46px;width:107%;height:calc(62% + 46px);z-index:0;pointer-events:none;overflow:visible}
+@media(max-width:640px){.nest{left:-5%;width:110%;bottom:-34px;height:calc(62% + 34px)}}
+.nest path{fill:none;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.nest .s1{stroke:var(--straw)}.nest .s2{stroke:#C8923A}.nest .s3{stroke:#7E6440}
+.nest path{stroke-dasharray:1600;stroke-dashoffset:1600;animation:weave 1.4s cubic-bezier(.3,.7,.2,1) forwards}
+.nest path:nth-child(2n){animation-delay:.12s}.nest path:nth-child(3n){animation-delay:.24s}
+@keyframes weave{to{stroke-dashoffset:0}}
+
+/* search, sitting in the nest */
+.searchbox{position:relative;z-index:2;background:var(--card);border-radius:22px;padding:18px;box-shadow:0 24px 60px -24px rgba(19,32,46,.55);color:var(--ink)}
+@media(max-width:640px){.searchbox{border-radius:18px;padding:14px}}
+.hero{padding-bottom:120px}
+@media(max-width:640px){.hero{padding-bottom:88px}}
+.go .hidelbl{display:none}
+@media(min-width:860px){.go .hidelbl{display:block}}
+.sgrid .go .btn.big{height:auto}
+@media(min-width:860px){.sgrid .go .btn.big{height:calc(100% - 23px)}}
+.sgrid{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+@media(min-width:860px){.sgrid{grid-template-columns:1.1fr 1.1fr 1fr 1fr 1.25fr}}
+.sgrid .go{grid-column:1/-1}
+@media(min-width:860px){.sgrid .go{grid-column:auto}}
+.more{display:none;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;padding-top:12px;border-top:1px solid var(--line)}
+.more.on{display:grid}
+@media(min-width:860px){.more{grid-template-columns:repeat(5,1fr)}}
+.morebtn{background:none;border:0;font:inherit;font-weight:600;color:var(--mute);cursor:pointer;padding:8px 2px 0;font-size:14px}
+.morebtn:hover{color:var(--ink)}
+
+label{display:block;font-size:13px;font-weight:600;color:var(--mute);margin-bottom:5px}
+input,select,textarea{width:100%;padding:12px 13px;border:1.5px solid var(--line);border-radius:12px;font:inherit;font-size:16px;background:#fff;color:var(--ink);appearance:none;-webkit-appearance:none}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%235D6B7A' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:34px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--straw);box-shadow:0 0 0 3px rgba(232,176,75,.28)}
+textarea{min-height:110px;resize:vertical}
+select:disabled{background-color:#F6F7F9;color:#9AA6B2}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:12px;padding:12px 18px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;background:var(--straw);color:var(--ink);text-decoration:none;line-height:1.2}
+.btn:hover{background:#F0C063}
+.btn.big{height:100%;min-height:50px;font-size:16px;width:100%;font-family:var(--display);font-weight:700;letter-spacing:-.01em}
+.btn.dark{background:var(--ink);color:#fff}.btn.dark:hover{background:var(--ink2)}
+.btn.ghost{background:#fff;border:1.5px solid var(--line);color:var(--ink)}.btn.ghost:hover{border-color:#C3CCD6}
+.btn.sm{padding:8px 12px;font-size:13px;border-radius:9px}
+.btn.danger{background:#fff;border:1.5px solid #EBC7C3;color:var(--bad)}
+.btn[disabled]{opacity:.55;cursor:wait}
+
+/* body-type shortcuts */
+.shortcuts{display:flex;gap:8px;overflow-x:auto;padding:58px 0 4px;scrollbar-width:none}
+.shortcuts::-webkit-scrollbar{display:none}
+.chipbtn{flex:none;display:inline-flex;align-items:center;gap:8px;border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:9px 14px 9px 10px;font:inherit;font-weight:600;font-size:15px;color:var(--ink);cursor:pointer}
+.chipbtn svg{width:26px;height:16px;color:var(--mute)}
+.chipbtn small{color:var(--mute);font-weight:500;font-size:13px}
+.chipbtn:hover{border-color:#C3CCD6}
+.chipbtn.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.chipbtn.on svg,.chipbtn.on small{color:#C9D3DE}
+
+/* results */
+.bar{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:26px 0 14px}
+.bar h2{font-size:clamp(24px,3.4vw,32px);font-weight:700}
+.bar .sortsel{width:auto;min-width:200px;padding-top:9px;padding-bottom:9px;font-size:15px}
+.active-filters{display:flex;gap:6px;flex-wrap:wrap;margin:-4px 0 14px}
+.afl{display:inline-flex;align-items:center;gap:6px;background:var(--straw-soft);border:0;border-radius:999px;padding:6px 8px 6px 12px;font:inherit;font-size:14px;font-weight:600;color:#5A4210;cursor:pointer}
+.afl span{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:rgba(90,66,16,.12);font-size:12px}
+.cards{display:grid;gap:18px;grid-template-columns:1fr}
+@media(min-width:600px){.cards{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:980px){.cards{grid-template-columns:repeat(3,1fr);gap:22px}}
+.car{display:flex;flex-direction:column;text-decoration:none;color:var(--ink);background:var(--card);border-radius:18px;overflow:hidden;border:1px solid #E6EAEF}
+.car .pic{position:relative;aspect-ratio:4/3;background:var(--sky)}
+.car .pic img{width:100%;height:100%;object-fit:cover;display:block}
+.car .price{position:absolute;left:12px;bottom:12px;background:var(--straw);color:var(--ink);font-family:var(--display);font-weight:800;font-size:21px;letter-spacing:-.02em;padding:5px 12px;border-radius:10px}
+.car .count{position:absolute;right:10px;top:10px;background:rgba(19,32,46,.72);color:#fff;font-size:12px;font-weight:600;padding:4px 8px;border-radius:7px;display:flex;align-items:center;gap:5px}
+.car .count svg{width:13px;height:13px}
+.car .b{padding:14px 16px 16px;display:flex;flex-direction:column;gap:4px;flex:1}
+.car h3{font-size:19px;font-weight:700;letter-spacing:-.015em}
+.car:hover h3{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px;text-decoration-color:var(--straw)}
+.car .v{color:var(--mute);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.specs{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px;font-weight:600;margin-top:6px}
+.specs span{display:inline-flex;align-items:center;gap:5px}
+.specs svg{width:15px;height:15px;color:var(--mute)}
+.car .loc{margin-top:auto;padding-top:12px;display:flex;align-items:center;gap:6px;font-size:13px;color:var(--mute)}
+.car .loc svg{width:14px;height:14px;flex:none}
+.car .loc b{color:var(--ink);font-weight:600}
+.ph{display:grid;place-items:center;width:100%;height:100%;color:#7F8EA0;font-size:14px;font-weight:600;background:repeating-linear-gradient(135deg,#DCE6EE 0 14px,#D3DEE8 14px 28px)}
+.empty{background:#fff;border-radius:18px;padding:40px 20px;text-align:center;color:var(--mute)}
+.empty b{display:block;color:var(--ink);font-family:var(--display);font-size:21px;margin-bottom:6px}
+.loadmore{display:flex;justify-content:center;margin:26px 0 0}
+
+/* dealers strip */
+.section{padding:56px 0 0}
+.section h2{font-size:clamp(26px,3.6vw,36px);font-weight:700}
+.section p.sub{color:var(--mute);margin:8px 0 0;max-width:56ch}
+.dealers{display:grid;gap:12px;margin-top:20px;grid-template-columns:1fr}
+@media(min-width:700px){.dealers{grid-template-columns:repeat(3,1fr)}}
+.dealer{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid #E6EAEF;border-radius:16px;padding:14px 16px;text-decoration:none}
+.mono{flex:none;width:48px;height:48px;border-radius:14px;background:var(--ink);color:var(--straw);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:19px;letter-spacing:-.03em}
+.dealer b{display:block;font-size:16px}
+.dealer small{color:var(--mute);font-size:14px}
+.dealer .n{margin-left:auto;font-family:var(--display);font-weight:700;font-size:20px;text-align:right;line-height:1}
+.dealer .n small{display:block;font-family:var(--body);font-weight:500;font-size:12px;margin-top:3px}
+
+/* dealer call-to-action */
+.sellband{margin:64px 0 0;background:var(--straw);color:var(--ink);border-radius:26px;padding:34px 26px;display:grid;gap:18px;align-items:center;position:relative;overflow:hidden}
+@media(min-width:860px){.sellband{grid-template-columns:1.4fr 1fr;padding:44px 48px}}
+.sellband h2{font-size:clamp(28px,4vw,42px);font-weight:800;max-width:18ch}
+.sellband p{margin:10px 0 0;font-size:17px;max-width:44ch;color:#3F3215}
+.sellband ul{list-style:none;padding:0;margin:0;display:grid;gap:10px;font-weight:600}
+.sellband li{display:flex;gap:10px;align-items:flex-start}
+.sellband li svg{flex:none;width:22px;height:22px;margin-top:1px}
+.sellband .btn{margin-top:18px}
+
+/* footer */
+footer{margin-top:64px;background:var(--ink);color:#AEBBC9;padding:38px 0 30px;font-size:14px}
+footer .wrap{display:grid;gap:18px}
+@media(min-width:760px){footer .wrap{grid-template-columns:1.4fr 1fr 1fr}}
+footer .logo{font-size:21px}
+footer p{margin:10px 0 0;max-width:38ch}
+footer h4{color:#fff;font-size:15px;margin:0 0 8px}
+footer a{display:block;color:#C9D3DE;text-decoration:none;padding:3px 0}
+footer a:hover{color:#fff}
+
+/* car page */
+.crumb{display:inline-flex;align-items:center;gap:6px;margin:18px 0 0;color:var(--mute);text-decoration:none;font-weight:600;font-size:15px}
+.crumb:hover{color:var(--ink)}
+.detail{display:grid;gap:22px;grid-template-columns:minmax(0,1fr);margin-top:14px;align-items:start}
+.detail>*{min-width:0}
+@media(min-width:960px){.detail{grid-template-columns:minmax(0,1.6fr) minmax(320px,1fr)}}
+.gal{position:relative;border-radius:20px;overflow:hidden;background:var(--sky);aspect-ratio:4/3}
+.gal img.main{width:100%;height:100%;object-fit:cover;display:block}
+.gal .nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:var(--ink);display:grid;place-items:center;cursor:pointer;box-shadow:0 4px 14px rgba(19,32,46,.25)}
+.gal .nav svg{width:20px;height:20px}
+.gal .prev{left:12px}.gal .next{right:12px}
+.gal .ctr{position:absolute;right:12px;bottom:12px;background:rgba(19,32,46,.75);color:#fff;font-size:13px;font-weight:600;padding:5px 10px;border-radius:8px}
+.thumbs{display:flex;gap:8px;overflow-x:auto;margin-top:10px;padding-bottom:4px;scrollbar-width:thin}
+.thumbs button{flex:none;border:2px solid transparent;border-radius:10px;padding:0;background:none;cursor:pointer;overflow:hidden;width:92px;height:69px}
+.thumbs button img{width:100%;height:100%;object-fit:cover;display:block}
+.thumbs button.on{border-color:var(--straw)}
+.titleblock{margin-top:20px}
+.titleblock h1{font-size:clamp(28px,4vw,40px);font-weight:800}
+.titleblock .v{color:var(--mute);font-size:17px;margin-top:6px}
+.mprice{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px}
+.mprice .p{font-family:var(--display);font-weight:800;font-size:34px;letter-spacing:-.03em}
+@media(min-width:960px){.mprice{display:none}}
+.keyfacts{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.keyfacts span{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid #E6EAEF;border-radius:999px;padding:8px 14px;font-weight:600;font-size:15px}
+.keyfacts svg{width:17px;height:17px;color:var(--mute)}
+.specgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 24px;margin:22px 0 0;background:#fff;border-radius:18px;padding:6px 20px;border:1px solid #E6EAEF}
+@media(min-width:640px){.specgrid{grid-template-columns:repeat(3,1fr)}}
+.specgrid div{padding:12px 0;border-bottom:1px solid #EEF1F4}
+.specgrid dt{font-size:13px;color:var(--mute)}
+.specgrid dd{margin:2px 0 0;font-weight:700}
+.about{margin-top:22px;background:#fff;border-radius:18px;padding:20px;border:1px solid #E6EAEF}
+.about h2{font-size:21px;margin-bottom:8px}
+.about p{margin:0;white-space:pre-wrap}
+.side{display:grid;gap:14px}
+@media(min-width:960px){.side{position:sticky;top:84px}}
+.pricecard{background:var(--ink);color:#fff;border-radius:20px;padding:22px}
+.pricecard .p{font-family:var(--display);font-weight:800;font-size:44px;letter-spacing:-.03em;color:var(--straw);line-height:1}
+.pricecard .seller{margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.1);display:flex;gap:12px;align-items:center}
+.pricecard .seller a{color:#fff;font-weight:700;text-decoration:none}
+.pricecard .seller a:hover{text-decoration:underline}
+.pricecard .seller small{display:block;color:#AEBBC9;font-size:14px}
+.pricecard .mono{background:var(--straw);color:var(--ink)}
+.pricecard .btn{width:100%;margin-top:14px}
+.enq{background:#fff;border-radius:20px;padding:20px;border:1px solid #E6EAEF}
+.enq h2{font-size:21px;margin-bottom:12px}
+.enq .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.enq .f{margin-bottom:10px}
+.done{text-align:center;padding:10px 0}
+.done b{display:block;font-family:var(--display);font-size:22px;margin-bottom:6px}
+
+/* dealer page */
+.dhead{background:var(--ink);color:#fff;padding:34px 0 30px}
+.dhead .in{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.dhead .mono{width:68px;height:68px;font-size:26px;border-radius:18px;background:var(--straw);color:var(--ink)}
+.dhead h1{font-size:clamp(28px,4.5vw,44px);font-weight:800}
+.dhead p{margin:6px 0 0;color:#B8C4D1}
+.dhead .acts{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.dhead .about{margin-top:20px;background:rgba(255,255,255,.05);border:0;color:#D5DEE7}
+
+/* portal + admin (kept simple) */
+.panel{background:var(--card);border-radius:18px;padding:18px;border:1px solid #E6EAEF}
 .grid{display:grid;gap:10px;grid-template-columns:repeat(2,1fr)}
 @media(min-width:760px){.grid{grid-template-columns:repeat(4,1fr)}.grid.g3{grid-template-columns:repeat(3,1fr)}}
-label{display:block;font-size:12px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
-input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:15px;background:#fff;color:var(--ink)}
-input:focus,select:focus,textarea:focus{outline:2px solid var(--acc);outline-offset:1px;border-color:transparent}
-textarea{min-height:110px;resize:vertical}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:10px;padding:11px 18px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;background:var(--acc);color:#1b1200;text-decoration:none}
-.btn:hover{background:var(--acc2)}
-.btn.dark{background:var(--ink);color:#fff}.btn.dark:hover{background:var(--ink2)}
-.btn.ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}.btn.ghost:hover{background:#f0f2f6}
-.btn.sm{padding:7px 11px;font-size:13px;border-radius:8px}
-.btn.danger{background:#fff;border:1px solid #f0c4c4;color:var(--bad)}
-.btn[disabled]{opacity:.55;cursor:wait}
-.bar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:22px 0 12px}
-.bar h2{margin:0;font-size:20px;letter-spacing:-.3px}
-.cards{display:grid;gap:16px;grid-template-columns:1fr}
-@media(min-width:620px){.cards{grid-template-columns:repeat(2,1fr)}}
-@media(min-width:960px){.cards{grid-template-columns:repeat(3,1fr)}}
-.car{background:var(--card);border-radius:var(--r);overflow:hidden;text-decoration:none;display:flex;flex-direction:column;box-shadow:0 2px 10px rgba(14,26,43,.06);transition:transform .15s,box-shadow .15s}
-.car:hover{transform:translateY(-3px);box-shadow:0 10px 26px rgba(14,26,43,.13)}
-.ph{aspect-ratio:4/3;background:linear-gradient(135deg,#dfe5ee,#c9d2e0);display:flex;align-items:center;justify-content:center;color:#7d8aa3;font-weight:600;font-size:13px;overflow:hidden}
-.ph img{width:100%;height:100%;object-fit:cover;display:block}
-.car .b{padding:14px;display:flex;flex-direction:column;gap:6px;flex:1}
-.car h3{margin:0;font-size:17px;letter-spacing:-.2px}
-.car .v{color:var(--mut);font-size:13px;margin-top:-4px}
-.price{font-size:22px;font-weight:800;letter-spacing:-.5px}
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{background:#eef1f6;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;color:#3b4a63}
-.loc{margin-top:auto;padding-top:8px;border-top:1px solid var(--line);font-size:13px;color:var(--mut)}
-.detail{display:grid;gap:18px;grid-template-columns:1fr;margin-top:18px}
-@media(min-width:900px){.detail{grid-template-columns:1.5fr 1fr}}
-.gal .main{border-radius:var(--r);overflow:hidden}
-.thumbs{display:flex;gap:8px;overflow-x:auto;margin-top:8px;padding-bottom:4px}
-.thumbs img{width:86px;height:64px;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid transparent;flex:none}
-.thumbs img.on{border-color:var(--acc)}
-.spec{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0}
-@media(min-width:620px){.spec{grid-template-columns:repeat(3,1fr)}}
-.spec div{background:#f3f5f9;border-radius:10px;padding:10px 12px}
-.spec small{display:block;color:var(--mut);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
-.spec b{font-size:15px}
 .tabs{display:flex;gap:6px;overflow-x:auto;margin:14px 0}
-.tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font:inherit;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap;color:var(--ink)}
+.tab{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:8px 15px;font:inherit;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap;color:var(--ink)}
 .tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-.row{display:flex;gap:12px;align-items:center;background:#fff;border-radius:12px;padding:10px;margin-bottom:8px;box-shadow:0 1px 5px rgba(14,26,43,.05);flex-wrap:wrap}
-.row .ph{width:92px;aspect-ratio:4/3;border-radius:8px;flex:none;font-size:10px}
+.row{display:flex;gap:12px;align-items:center;background:#fff;border-radius:14px;padding:10px;margin-bottom:8px;border:1px solid #E6EAEF;flex-wrap:wrap}
+.row .ph,.row .pic{width:96px;aspect-ratio:4/3;border-radius:10px;flex:none;overflow:hidden;height:auto;font-size:10px}
+.row .pic img{width:100%;height:100%;object-fit:cover;display:block}
 .row .info{flex:1;min-width:160px}
 .row .info b{display:block}
-.row .info small{color:var(--mut)}
+.row .info small{color:var(--mute)}
 .acts{display:flex;gap:6px;flex-wrap:wrap}
-.badge{display:inline-block;border-radius:999px;padding:2px 9px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px}
-.badge.live,.badge.approved{background:#dff5ec;color:#08714e}
-.badge.sold,.badge.suspended{background:#fde4e4;color:#a52a2a}
-.badge.draft,.badge.pending,.badge.new{background:#fff1d6;color:#8a5a00}
-.badge.contacted{background:#e1ecff;color:#1f4fa3}.badge.closed{background:#eceff4;color:#4b5873}
-.note{background:#fff7e3;border:1px solid #f4dca0;border-radius:10px;padding:10px 12px;font-size:14px;margin:10px 0}
+.badge{display:inline-block;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700}
+.badge.live,.badge.approved{background:#DDF2E7;color:#1D6B47}
+.badge.sold,.badge.suspended,.badge.rejected{background:#F8E0DE;color:#9C2E26}
+.badge.draft,.badge.pending,.badge.new{background:var(--straw-soft);color:#7A5410}
+.badge.contacted{background:#E1ECFA;color:#1F4F93}.badge.closed{background:#ECEFF3;color:#4B5873}
+.note{background:var(--straw-soft);border-radius:12px;padding:11px 13px;font-size:15px;margin:10px 0;color:#4D3A10}
 .err{color:var(--bad);font-size:14px;font-weight:600;margin-top:8px}
-.muted{color:var(--mut)}
-.center{text-align:center;padding:50px 10px;color:var(--mut)}
+.muted{color:var(--mute)}
+.center{text-align:center;padding:60px 10px;color:var(--mute)}
 .narrow{max-width:460px;margin:30px auto}
 .pgrid{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 .pgrid .p{position:relative}
-.pgrid img{width:96px;height:72px;object-fit:cover;border-radius:8px;display:block}
+.pgrid img{width:96px;height:72px;object-fit:cover;border-radius:9px;display:block}
 .pgrid button{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:0;background:var(--bad);color:#fff;font-weight:800;cursor:pointer;line-height:1}
-footer{margin-top:50px;background:var(--ink);color:#aeb9cd;padding:22px 0;font-size:13px}
-#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:10px;font-weight:600;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;max-width:90vw}
+.portalhead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:24px 0 6px}
+.portalhead h2{font-size:26px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:12px;font-weight:600;font-size:15px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;max-width:90vw}
 #toast.on{opacity:1}
-pre.code{background:#0e1a2b;color:#d8e2f3;padding:12px;border-radius:10px;overflow:auto;font-size:12px}
+pre.code{background:var(--ink);color:#D8E2F3;padding:12px;border-radius:12px;overflow:auto;font-size:12px}
+.joinhero{padding:40px 0 34px}
+.joinhero h1{font-size:clamp(32px,5.4vw,56px);font-weight:800;max-width:16ch}
 </style>
 </head>
 <body>
 <header class="top"><div class="wrap">
-  <a class="logo" href="#/"><svg viewBox="0 0 32 32" fill="none"><path d="M4 18c0-7 5-12 12-12s12 5 12 12" stroke="#f5a524" stroke-width="3" stroke-linecap="round"/><path d="M7 21h18l-2 5H9l-2-5z" fill="#f5a524"/><circle cx="16" cy="15" r="3" fill="#fff"/></svg>Motor<span>Nest</span></a>
+  <a class="logo" href="#/" aria-label="MotorNest home"><svg viewBox="0 0 40 40" aria-hidden="true"><ellipse cx="20" cy="16" rx="8.5" ry="10.5" fill="#E8B04B"/><path d="M14.5 14.5c3.2-3 7.8-3 11 0" stroke="#13202E" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M4 21c3 11 29 11 32 0" stroke="#E8B04B" stroke-width="3.2" fill="none" stroke-linecap="round"/><path d="M6.5 26.5c6 6.5 21 6.5 27 0" stroke="#C8923A" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M5 22.5l9 9M35 22.5l-9 9M10 21l14 12M30 21L16 33" stroke="#7E6440" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><span>Motor<b>Nest</b></span></a>
   <nav id="nav"></nav>
 </div></header>
 <main id="app"><div class="center">Loading MotorNest…</div></main>
-<footer><div class="wrap">MotorNest · Used cars from independent dealers in and around Sheffield · <a href="#/join">Dealers: list your stock</a> · <a href="#/portal">Dealer portal</a></div></footer>
+<footer><div class="wrap"><div><a class="logo" href="#/"><svg viewBox="0 0 40 40" aria-hidden="true"><ellipse cx="20" cy="16" rx="8.5" ry="10.5" fill="#E8B04B"/><path d="M14.5 14.5c3.2-3 7.8-3 11 0" stroke="#13202E" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M4 21c3 11 29 11 32 0" stroke="#E8B04B" stroke-width="3.2" fill="none" stroke-linecap="round"/><path d="M6.5 26.5c6 6.5 21 6.5 27 0" stroke="#C8923A" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M5 22.5l9 9M35 22.5l-9 9M10 21l14 12M30 21L16 33" stroke="#7E6440" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><span>Motor<b>Nest</b></span></a><p>Used cars from independent dealers in and around Sheffield, all in one place.</p></div><div><h4>Buying</h4><a href="#/">Find a car</a><a href="#/#dealers">Dealers</a></div><div><h4>For dealers</h4><a href="#/join">List your stock</a><a href="#/portal">Dealer login</a></div></div></footer>
 <div id="toast"></div>
 
 <script>
@@ -151,19 +311,6 @@ async function geocode(pc) {
   } catch (e) { }
   return null;
 }
-function img(c, cls) {
-  const p = c.photos && c.photos[0];
-  return '<div class="ph ' + (cls || '') + '">' + (p ? '<img loading="lazy" alt="" src="' + esc(photoUrl(p.path)) + '">' : 'Photo coming soon') + '</div>';
-}
-function nav() {
-  let h = '<a class="hm" href="#/">Find a car</a>';
-  if (!S.user) h += '<a href="#/join">List your stock</a>';
-  if (S.isAdmin) h += '<a href="#/admin">Admin</a>';
-  h += '<a href="#/portal">' + (S.user ? 'My portal' : 'Dealer login') + '</a>';
-  if (S.user) h += '<a href="#" onclick="signOut();return false">Sign out</a>';
-  $('#nav').innerHTML = h;
-}
-
 // ---------- public data ----------
 async function loadCars(force) {
   if (S.cars && !force) return S.cars;
@@ -173,127 +320,241 @@ async function loadCars(force) {
   if (error) throw error;
   S.cars = data.filter(c => c.dealer && c.dealer.status === 'approved');
   S.cars.forEach(c => c.photos.sort((a, b) => a.sort_order - b.sort_order));
+  mixCars();
   setDistances();
   return S.cars;
 }
+function mixCars() {
+  const groups = {};
+  S.cars.forEach(c => (groups[c.dealer_id] = groups[c.dealer_id] || []).push(c));
+  Object.values(groups).forEach(g => {
+    for (let i = g.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [g[i], g[j]] = [g[j], g[i]]; }
+    g.forEach((c, i) => { c.mix = (i + Math.random()) / g.length; });
+  });
+}
 function setDistances() { (S.cars || []).forEach(c => c.dist = miles(S.origin, c.dealer)); }
+// ---------- icons ----------
+const IC = {
+  road: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 21 9 3M19 21 15 3M12 6v2M12 11v2M12 16v2"/></svg>',
+  fuel: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16M3 21h12M4 10h10M14 8h2a2 2 0 0 1 2 2v6a1.5 1.5 0 0 0 3 0V8l-3-3"/></svg>',
+  gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="5" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="12" cy="19" r="2"/><path d="M5 7v10M12 7v10M19 7v5H5"/></svg>',
+  cal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+  pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
+  cam: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+  left: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  right: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
+  phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>',
+  tick: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" fill="rgba(19,32,46,.1)" stroke="none"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>',
+};
+// side profiles for the body-type shortcuts
+const BODY_IC = {
+  Hatchback: 'M3 17h2m14 0h2M5 17V13l3-5h7l4 5h1.5a1.5 1.5 0 0 1 1.5 1.5V17H19M5 17h14',
+  SUV: 'M3 17h2m14 0h2M5 17v-5l2-5h11l2 5h1v5h-2M5 17h14',
+  Estate: 'M3 17h2m14 0h2M5 17v-4l3-5h12l1 5v4h-2M5 17h14',
+  Saloon: 'M2 17h3m14 0h3M5 17v-3l1-1 3-4h6l3 4h3v4h-3M5 17h14',
+  MPV: 'M3 17h2m14 0h2M5 17v-5l4-6h9l2 6h1v5h-2M5 17h14',
+  Convertible: 'M2 17h3m14 0h3M5 17v-3l4-1 2-3m4 3h6v4h-3M5 17h14',
+  Coupe: 'M2 17h3m14 0h3M5 17v-3l5-5h5l4 4h3v4h-3M5 17h14',
+};
+const bodyIcon = (b) => '<svg viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="' + (BODY_IC[b] || BODY_IC.Hatchback) + '"/><circle cx="7.5" cy="17" r="2"/><circle cx="16.5" cy="17" r="2"/></svg>';
+const initials = (n) => String(n || '').replace(/\b(ltd|limited|group|motor|motors|the|of|and)\b/gi, ' ').trim().split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'MN';
+
+function img(c, cls) {
+  const p = c.photos && c.photos[0];
+  return p ? '<div class="pic ' + (cls || '') + '"><img loading="lazy" alt="" src="' + esc(photoUrl(p.path)) + '"></div>' : '<div class="ph ' + (cls || '') + '">Photo coming soon</div>';
+}
+function nav() {
+  let h = '<a class="hm" href="#/">Find a car</a><a class="hm" href="#/#dealers">Dealers</a>';
+  if (S.isAdmin) h += '<a href="#/admin">Admin</a>';
+  h += '<a href="#/portal">' + (S.user ? 'My portal' : 'Dealer login') + '</a>';
+  if (S.user) h += '<a href="#" onclick="signOut();return false">Sign out</a>';
+  else h += '<a class="cta hm" href="#/join">List your stock</a>';
+  $('#nav').innerHTML = h;
+}
 function cardHtml(c) {
-  return '<a class="car" href="#/car/' + c.id + '">' + img(c) + '<div class="b"><h3>' + esc(title(c)) + '</h3>' +
-    (c.variant ? '<div class="v">' + esc(c.variant) + '</div>' : '') +
-    '<div class="price">' + money(c.price) + '</div><div class="chips">' +
-    (c.mileage != null ? '<span class="chip">' + num(c.mileage) + ' miles</span>' : '') +
-    (c.fuel ? '<span class="chip">' + esc(c.fuel) + '</span>' : '') +
-    (c.gearbox ? '<span class="chip">' + esc(c.gearbox) + '</span>' : '') +
-    '</div><div class="loc">' + esc(c.dealer.name) + (c.dealer.town ? ' · ' + esc(c.dealer.town) : '') +
-    (c.dist != null ? ' · ' + c.dist.toFixed(c.dist < 10 ? 1 : 0) + ' mi' : '') + '</div></div></a>';
+  const p = c.photos && c.photos[0];
+  return '<a class="car" href="#/car/' + c.id + '"><div class="pic">' +
+    (p ? '<img loading="lazy" alt="' + esc(title(c)) + '" src="' + esc(photoUrl(p.path)) + '">' : '<div class="ph">Photo coming soon</div>') +
+    '<span class="price">' + money(c.price) + '</span>' +
+    (c.photos.length > 1 ? '<span class="count">' + IC.cam + c.photos.length + '</span>' : '') + '</div>' +
+    '<div class="b"><h3>' + esc(title(c)) + '</h3>' + (c.variant ? '<div class="v">' + esc(c.variant) + '</div>' : '') +
+    '<div class="specs">' + (c.mileage != null ? '<span>' + IC.road + num(c.mileage) + ' mi</span>' : '') +
+    (c.fuel ? '<span>' + IC.fuel + esc(c.fuel) + '</span>' : '') + (c.gearbox ? '<span>' + IC.gear + esc(c.gearbox) + '</span>' : '') + '</div>' +
+    '<div class="loc">' + IC.pin + '<span><b>' + esc(c.dealer.name) + '</b>, ' + esc(c.dealer.town || '') +
+    (c.dist != null ? ' (' + c.dist.toFixed(c.dist < 10 ? 1 : 0) + ' mi)' : '') + '</span></div></div></a>';
 }
 
 // ---------- customer site ----------
 function opts(list, sel, any) { return '<option value="">' + any + '</option>' + list.map(v => '<option' + (String(v) === String(sel) ? ' selected' : '') + '>' + esc(v) + '</option>').join(''); }
-function priceOpts(sel, any) { return '<option value="">' + any + '</option>' + [2000, 3000, 4000, 5000, 7500, 10000, 12500, 15000, 20000, 25000, 30000, 40000, 50000].map(v => '<option value="' + v + '"' + (String(v) === String(sel) ? ' selected' : '') + '>' + money(v) + '</option>').join(''); }
+function priceOpts(sel, any) { return '<option value="">' + any + '</option>' + [1000, 2000, 3000, 4000, 5000, 7500, 10000, 12500, 15000, 20000, 25000, 30000, 40000, 50000].map(v => '<option value="' + v + '"' + (String(v) === String(sel) ? ' selected' : '') + '>' + money(v) + '</option>').join(''); }
+const NEST_SVG = '<svg class="nest" viewBox="0 0 1000 200" preserveAspectRatio="none" aria-hidden="true">' +
+  '<path class="s3" stroke-width="5" d="M0 4 C 30 210, 970 210, 1000 4"/>' +
+  '<path class="s1" stroke-width="7" d="M8 0 C 50 186, 950 196, 994 10"/>' +
+  '<path class="s2" stroke-width="4" d="M-6 30 C 120 220, 760 170, 1004 2"/>' +
+  '<path class="s1" stroke-width="4" d="M4 14 C 260 160, 880 214, 1006 30"/>' +
+  '<path class="s3" stroke-width="3" d="M20 -4 C 120 200, 620 205, 990 40"/>' +
+  '<path class="s2" stroke-width="6" d="M-4 50 C 300 214, 700 214, 1004 50"/>' +
+  '<path class="s1" stroke-width="3" d="M30 60 C 300 180, 760 120, 980 -6"/>' +
+  '<path class="s3" stroke-width="3" d="M-2 20 C 240 130, 700 228, 1002 70"/>' +
+  '</svg>';
+
 async function viewHome() {
-  app().innerHTML = '<section class="hero"><div class="wrap"><h1>Find your next car, <em>close to home</em></h1><p>Quality used cars from independent dealers in and around Sheffield.</p></div></section><div class="wrap"><div class="panel search" id="search"></div><div id="results"><div class="center">Loading cars…</div></div></div>';
-  try { await loadCars(); } catch (e) { $('#results').innerHTML = '<div class="center">Could not load cars. ' + esc(e.message) + '</div>'; return; }
-  const f = S.f, makes = [...new Set(S.cars.map(c => c.make))].sort();
-  $('#search').innerHTML = '<div class="grid">' +
-    '<div><label>Make</label><select onchange="setF(\'make\',this.value,1)">' + opts(makes, f.make, 'Any make') + '</select></div>' +
-    '<div><label>Model</label><select id="fmodel" onchange="setF(\'model\',this.value)"></select></div>' +
-    '<div><label>Min price</label><select onchange="setF(\'pmin\',this.value)">' + priceOpts(f.pmin, 'No min') + '</select></div>' +
-    '<div><label>Max price</label><select onchange="setF(\'pmax\',this.value)">' + priceOpts(f.pmax, 'No max') + '</select></div>' +
-    '<div><label>Max mileage</label><select onchange="setF(\'miles\',this.value)"><option value="">Any mileage</option>' + [10000, 20000, 30000, 40000, 50000, 60000, 80000, 100000, 150000].map(v => '<option value="' + v + '"' + (String(v) === String(f.miles) ? ' selected' : '') + '>Up to ' + num(v) + '</option>').join('') + '</select></div>' +
-    '<div><label>Fuel</label><select onchange="setF(\'fuel\',this.value)">' + opts(FUELS, f.fuel, 'Any fuel') + '</select></div>' +
-    '<div><label>Gearbox</label><select onchange="setF(\'gear\',this.value)">' + opts(['Manual', 'Automatic'], f.gear, 'Any gearbox') + '</select></div>' +
-    '<div><label>Distance</label><select onchange="setF(\'dist\',this.value)"><option value="">Any distance</option>' + [5, 10, 20, 30, 50, 100].map(v => '<option value="' + v + '"' + (String(v) === String(f.dist) ? ' selected' : '') + '>Within ' + v + ' miles</option>').join('') + '</select></div>' +
-    '<div><label>From postcode</label><input id="fpc" placeholder="Sheffield (default)" value="' + esc(S.origin === SHEFFIELD ? '' : S.origin.label) + '" onchange="setOrigin(this.value)"></div>' +
-    '<div><label>Sort by</label><select onchange="setF(\'sort\',this.value)">' + [['new', 'Newest listed'], ['plo', 'Price: low to high'], ['phi', 'Price: high to low'], ['mil', 'Lowest mileage'], ['near', 'Nearest first']].map(o => '<option value="' + o[0] + '"' + (f.sort === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></div>' +
-    '</div>';
-  fillModels(); renderResults();
+  app().innerHTML = '<section class="hero"><div class="wrap"><h1>Find your next car from Sheffield\'s local dealers</h1>' +
+    '<p class="lede" id="lede">Loading the latest stock…</p></div></section>' +
+    '<div class="wrap"><div class="nestwrap">' + NEST_SVG + '<div class="searchbox" id="search"></div></div><div class="shortcuts" id="shortcuts"></div><div id="results"><div class="center">Loading cars…</div></div>' +
+    '<section class="section" id="dealers"></section>' +
+    '<section class="sellband"><div><h2>Sell cars around Sheffield? List them here.</h2><p>Your stock goes live on MotorNest and stays in step with your own website, so there is nothing extra to keep up to date.</p><a class="btn dark" href="#/join">Apply to list your stock</a></div>' +
+    '<ul><li>' + IC.tick + 'Cars copied from your website every hour</li><li>' + IC.tick + 'Sold cars come down automatically</li><li>' + IC.tick + 'Enquiries go straight to you</li><li>' + IC.tick + 'Your own dealer page with every car</li></ul></section></div>';
+  try { await loadCars(); } catch (e) { $('#results').innerHTML = '<div class="empty"><b>Cars could not load</b>Check your connection and refresh the page. (' + esc(e.message) + ')</div>'; return; }
+  const dealers = {}; S.cars.forEach(c => { (dealers[c.dealer_id] = dealers[c.dealer_id] || { d: c.dealer, n: 0 }).n++; });
+  const dl = Object.values(dealers).sort((a, b) => b.n - a.n);
+  $('#lede').innerHTML = '<strong>' + num(S.cars.length) + ' cars</strong> for sale right now from <strong>' + dl.length + ' independent dealers</strong> in and around Sheffield.';
+  renderSearch(); renderShortcuts(); renderResults();
+  $('#dealers').innerHTML = '<h2>The dealers on MotorNest</h2><p class="sub">Local, independent forecourts. Tap one to see everything they have in stock.</p><div class="dealers">' +
+    dl.map(x => '<a class="dealer" href="#/dealer/' + esc(x.d.slug) + '"><span class="mono">' + esc(initials(x.d.name)) + '</span><span><b>' + esc(x.d.name) + '</b><small>' + esc(x.d.town || '') + '</small></span><span class="n">' + x.n + '<small>cars</small></span></a>').join('') + '</div>';
+  if (location.hash === '#/#dealers' || S.jumpDealers) { S.jumpDealers = false; $('#dealers').scrollIntoView(); }
 }
+function renderSearch() {
+  const f = S.f, makes = [...new Set(S.cars.map(c => c.make))].sort();
+  const open = f.miles || f.fuel || f.gear || f.dist || f.pmin;
+  $('#search').innerHTML = '<div class="sgrid">' +
+    '<div><label for="fmake">Make</label><select id="fmake" onchange="setF(\'make\',this.value,1)">' + opts(makes, f.make, 'Any make') + '</select></div>' +
+    '<div><label for="fmodel">Model</label><select id="fmodel" onchange="setF(\'model\',this.value)"></select></div>' +
+    '<div><label for="fpmax">Max price</label><select id="fpmax" onchange="setF(\'pmax\',this.value)">' + priceOpts(f.pmax, 'Any price') + '</select></div>' +
+    '<div><label for="fpc">Your postcode</label><input id="fpc" autocomplete="postal-code" placeholder="e.g. S1 2HE" value="' + esc(S.origin === SHEFFIELD ? '' : S.origin.label) + '" onchange="setOrigin(this.value)"></div>' +
+    '<div class="go"><label class="hidelbl" style="visibility:hidden">Search</label><button class="btn big" id="gobtn" onclick="document.getElementById(\'results\').scrollIntoView({behavior:\'smooth\'})"></button></div></div>' +
+    '<button class="morebtn" onclick="this.nextElementSibling.classList.toggle(\'on\');this.textContent=this.nextElementSibling.classList.contains(\'on\')?\'Fewer filters\':\'More filters\'">' + (open ? 'Fewer filters' : 'More filters') + '</button>' +
+    '<div class="more' + (open ? ' on' : '') + '">' +
+    '<div><label for="fpmin">Min price</label><select id="fpmin" onchange="setF(\'pmin\',this.value)">' + priceOpts(f.pmin, 'No minimum') + '</select></div>' +
+    '<div><label for="fmi">Max mileage</label><select id="fmi" onchange="setF(\'miles\',this.value)"><option value="">Any mileage</option>' + [20000, 40000, 60000, 80000, 100000, 120000, 150000].map(v => '<option value="' + v + '"' + (String(v) === String(f.miles) ? ' selected' : '') + '>Up to ' + num(v) + '</option>').join('') + '</select></div>' +
+    '<div><label for="ffuel">Fuel</label><select id="ffuel" onchange="setF(\'fuel\',this.value)">' + opts(FUELS, f.fuel, 'Any fuel') + '</select></div>' +
+    '<div><label for="fgear">Gearbox</label><select id="fgear" onchange="setF(\'gear\',this.value)">' + opts(['Manual', 'Automatic'], f.gear, 'Any gearbox') + '</select></div>' +
+    '<div><label for="fdist">Distance</label><select id="fdist" onchange="setF(\'dist\',this.value)"><option value="">Any distance</option>' + [5, 10, 20, 30, 50].map(v => '<option value="' + v + '"' + (String(v) === String(f.dist) ? ' selected' : '') + '>Within ' + v + ' miles</option>').join('') + '</select></div></div>';
+  fillModels();
+}
+function renderShortcuts() {
+  const counts = {}; S.cars.forEach(c => { if (c.body_type) counts[c.body_type] = (counts[c.body_type] || 0) + 1; });
+  const bodies = Object.keys(BODY_IC).filter(b => counts[b]).sort((a, b) => counts[b] - counts[a]);
+  const autos = S.cars.filter(c => c.gearbox === 'Automatic').length, cheap = S.cars.filter(c => c.price <= 5000).length;
+  $('#shortcuts').innerHTML = bodies.map(b => '<button class="chipbtn' + (S.f.body === b ? ' on' : '') + '" onclick="toggleBody(\'' + b + '\')">' + bodyIcon(b) + b + ' <small>' + counts[b] + '</small></button>').join('') +
+    (autos ? '<button class="chipbtn' + (S.f.gear === 'Automatic' ? ' on' : '') + '" onclick="quick(\'gear\',\'Automatic\')">' + IC.gear.replace('<svg', '<svg style="width:18px"') + 'Automatic <small>' + autos + '</small></button>' : '') +
+    (cheap ? '<button class="chipbtn' + (String(S.f.pmax) === '5000' ? ' on' : '') + '" onclick="quick(\'pmax\',\'5000\')">Under £5,000 <small>' + cheap + '</small></button>' : '');
+}
+function quick(k, v) { S.f[k] = String(S.f[k]) === v ? '' : v; S.shown = 24; renderSearch(); renderResults(); }
+function toggleBody(b) { S.f.body = S.f.body === b ? '' : b; S.shown = 24; renderResults(); }
 function fillModels() {
   const el = $('#fmodel'); if (!el) return;
   const models = [...new Set(S.cars.filter(c => !S.f.make || c.make === S.f.make).map(c => c.model))].sort();
-  el.innerHTML = opts(models, S.f.model, 'Any model'); el.disabled = !S.f.make;
+  el.innerHTML = opts(models, S.f.model, S.f.make ? 'Any model' : 'Pick a make first'); el.disabled = !S.f.make;
 }
-function setF(k, v, resetModel) { S.f[k] = v; if (resetModel) { S.f.model = ''; fillModels(); } renderResults(); }
+function setF(k, v, resetModel) { S.f[k] = v; if (resetModel) { S.f.model = ''; fillModels(); } S.shown = 24; renderResults(); }
 async function setOrigin(v) {
   v = v.trim();
   if (!v) S.origin = SHEFFIELD;
-  else { const g = await geocode(v); if (!g) { toast('Postcode not found, using Sheffield'); S.origin = SHEFFIELD; } else S.origin = { lat: g.lat, lng: g.lng, label: v.toUpperCase() }; }
+  else { const g = await geocode(v); if (!g) { toast('Postcode not found, showing distances from Sheffield'); S.origin = SHEFFIELD; } else S.origin = { lat: g.lat, lng: g.lng, label: v.toUpperCase() }; }
   setDistances(); renderResults();
 }
-function renderResults() {
-  const f = S.f; let list = S.cars.filter(c =>
+function filtered() {
+  const f = S.f;
+  return S.cars.filter(c =>
     (!f.make || c.make === f.make) && (!f.model || c.model === f.model) &&
     (!f.pmin || c.price >= +f.pmin) && (!f.pmax || c.price <= +f.pmax) &&
     (!f.miles || (c.mileage != null && c.mileage <= +f.miles)) &&
-    (!f.fuel || c.fuel === f.fuel) && (!f.gear || c.gearbox === f.gear) &&
+    (!f.fuel || c.fuel === f.fuel) && (!f.gear || c.gearbox === f.gear) && (!f.body || c.body_type === f.body) &&
     (!f.dist || (c.dist != null && c.dist <= +f.dist)));
-  const s = f.sort || 'new';
+}
+const FILTER_NAMES = { make: v => v, model: v => v, pmin: v => 'From ' + money(v), pmax: v => 'Up to ' + money(v), miles: v => 'Under ' + num(v) + ' mi', fuel: v => v, gear: v => v, body: v => v, dist: v => 'Within ' + v + ' mi' };
+function clearF(k) { S.f[k] = ''; if (k === 'make') S.f.model = ''; S.shown = 24; renderSearch(); renderResults(); }
+function renderResults() {
+  const f = S.f; let list = filtered();
+  const s = f.sort || 'mix';
+  if (s === 'mix') list.sort((a, b) => a.mix - b.mix);
   if (s === 'plo') list.sort((a, b) => a.price - b.price);
   if (s === 'phi') list.sort((a, b) => b.price - a.price);
   if (s === 'mil') list.sort((a, b) => (a.mileage ?? 9e9) - (b.mileage ?? 9e9));
   if (s === 'near') list.sort((a, b) => (a.dist ?? 9e9) - (b.dist ?? 9e9));
   if (s === 'new') list.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
-  $('#results').innerHTML = '<div class="bar"><h2>' + list.length + ' car' + (list.length === 1 ? '' : 's') + ' found</h2><span class="muted">Distances from ' + esc(S.origin.label) + '</span></div>' +
-    (list.length ? '<div class="cards">' + list.map(cardHtml).join('') + '</div>' : '<div class="center">No cars match those filters yet. Try widening your search.</div>');
+  const go = $('#gobtn'); if (go) go.textContent = list.length ? 'Show ' + num(list.length) + ' car' + (list.length === 1 ? '' : 's') : 'No matches';
+  renderShortcuts();
+  const shown = S.shown || 24;
+  const active = Object.keys(FILTER_NAMES).filter(k => f[k]);
+  $('#results').innerHTML = '<div class="bar"><h2>' + num(list.length) + ' car' + (list.length === 1 ? '' : 's') + (S.origin !== SHEFFIELD ? ' near ' + esc(S.origin.label) : '') + '</h2>' +
+    '<select class="sortsel" aria-label="Sort cars" onchange="setF(\'sort\',this.value)">' + [['mix', 'Recommended'], ['plo', 'Lowest price'], ['phi', 'Highest price'], ['mil', 'Lowest mileage'], ['near', 'Nearest to you'], ['new', 'Newest listed']].map(o => '<option value="' + o[0] + '"' + (s === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></div>' +
+    (active.length ? '<div class="active-filters">' + active.map(k => '<button class="afl" onclick="clearF(\'' + k + '\')" aria-label="Remove filter">' + esc(FILTER_NAMES[k](f[k])) + '<span>✕</span></button>').join('') + '</div>' : '') +
+    (list.length ? '<div class="cards">' + list.slice(0, shown).map(cardHtml).join('') + '</div>' +
+      (list.length > shown ? '<div class="loadmore"><button class="btn ghost" onclick="S.shown=(S.shown||24)+24;renderResults()">Show more cars (' + num(list.length - shown) + ' left)</button></div>' : '')
+      : '<div class="empty"><b>No cars match those filters</b>Remove a filter above or raise your price limit to see more.</div>');
 }
 
 async function viewCar(id) {
   app().innerHTML = '<div class="wrap"><div class="center">Loading…</div></div>';
   try { await loadCars(); } catch (e) { return fail(e); }
   const c = S.cars.find(x => x.id === id);
-  if (!c) { app().innerHTML = '<div class="wrap"><div class="center">Sorry, this car is no longer available.<br><br><a class="btn" href="#/">Browse all cars</a></div></div>'; return; }
-  const d = c.dealer, sp = (l, v) => v == null || v === '' ? '' : '<div><small>' + l + '</small><b>' + esc(v) + '</b></div>';
-  app().innerHTML = '<div class="wrap"><p style="margin:16px 0 0"><a href="#/" class="muted">‹ Back to search</a></p><div class="detail"><div>' +
-    '<div class="gal"><div class="main" id="gmain">' + img(c) + '</div>' +
-    (c.photos.length > 1 ? '<div class="thumbs">' + c.photos.map((p, i) => '<img alt="" class="' + (i ? '' : 'on') + '" src="' + esc(photoUrl(p.path)) + '" onclick="showPhoto(this)">').join('') + '</div>' : '') + '</div>' +
-    '<div class="panel" style="margin-top:14px"><h1 style="margin:0;font-size:26px;letter-spacing:-.5px">' + esc(title(c)) + '</h1>' +
-    (c.variant ? '<div class="muted">' + esc(c.variant) + '</div>' : '') + '<div class="price" style="font-size:30px;margin-top:6px">' + money(c.price) + '</div>' +
-    '<div class="spec">' + sp('Mileage', c.mileage != null ? num(c.mileage) + ' miles' : null) + sp('Year', c.year) + sp('Fuel', c.fuel) + sp('Gearbox', c.gearbox) + sp('Body', c.body_type) + sp('Colour', c.colour) +
-    sp('Engine', c.engine_cc ? (c.engine_cc / 1000).toFixed(1) + 'L' : null) + sp('Doors', c.doors) + sp('Seats', c.seats) + sp('Owners', c.owners) +
-    sp('MOT until', c.mot_expiry ? new Date(c.mot_expiry).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }) : null) + sp('Reg', c.reg) + '</div>' +
-    (c.description ? '<h3 style="margin:8px 0 4px">About this car</h3><p style="white-space:pre-wrap;margin:0">' + esc(c.description) + '</p>' : '') + '</div></div>' +
-    '<div><div class="panel"><div class="muted" style="font-size:12px;font-weight:700;text-transform:uppercase">Sold by</div><h3 style="margin:2px 0"><a href="#/dealer/' + esc(d.slug) + '">' + esc(d.name) + '</a></h3>' +
-    '<div class="muted">' + esc([d.town, d.postcode].filter(Boolean).join(', ')) + (c.dist != null ? ' · ' + c.dist.toFixed(1) + ' miles from ' + esc(S.origin.label) : '') + '</div>' +
-    (d.phone ? '<a class="btn dark" style="width:100%;margin-top:12px" href="tel:' + esc(String(d.phone).replace(/[^0-9+]/g, '')) + '">Call ' + esc(d.phone) + '</a>' : '') + '</div>' +
-    '<form class="panel" style="margin-top:14px" onsubmit="return sendEnquiry(event,\'' + c.id + '\')"><h3 style="margin:0 0 10px">Enquire about this car</h3>' +
-    '<label>Your name</label><input name="name" required maxlength="120"><div style="height:8px"></div>' +
-    '<label>Phone</label><input name="phone" type="tel" maxlength="40"><div style="height:8px"></div>' +
-    '<label>Email</label><input name="email" type="email" maxlength="200"><div style="height:8px"></div>' +
-    '<label>Message</label><textarea name="message" maxlength="2000">Hi, is this ' + esc(title(c)) + ' still available?</textarea>' +
-    '<button class="btn" style="width:100%;margin-top:10px">Send enquiry</button><div class="err" id="enqerr"></div></form></div></div></div>';
+  if (!c) { app().innerHTML = '<div class="wrap"><div class="empty" style="margin-top:30px"><b>This car has been sold or taken off sale</b>There are plenty more like it.<br><br><a class="btn" href="#/">Browse all cars</a></div></div>'; return; }
+  const d = c.dealer, tel = String(d.phone || '').replace(/[^0-9+]/g, '');
+  const sp = (l, v) => v == null || v === '' ? '' : '<div><dt>' + l + '</dt><dd>' + esc(v) + '</dd></div>';
+  S.gal = { list: c.photos.map(p => photoUrl(p.path)), i: 0 };
+  app().innerHTML = '<div class="wrap"><a class="crumb" href="#/">' + IC.left.replace('<svg', '<svg width="16" height="16"') + 'All cars</a><div class="detail"><div>' +
+    (S.gal.list.length ? '<div class="gal"><img class="main" id="gmain" alt="' + esc(title(c)) + '" src="' + esc(S.gal.list[0]) + '">' +
+      (S.gal.list.length > 1 ? '<button class="nav prev" aria-label="Previous photo" onclick="galGo(-1)">' + IC.left + '</button><button class="nav next" aria-label="Next photo" onclick="galGo(1)">' + IC.right + '</button><span class="ctr" id="gctr">1 / ' + S.gal.list.length + '</span>' : '') + '</div>' +
+      (S.gal.list.length > 1 ? '<div class="thumbs" id="thumbs">' + S.gal.list.map((u, i) => '<button aria-label="Photo ' + (i + 1) + '" class="' + (i ? '' : 'on') + '" onclick="galGo(0,' + i + ')"><img loading="lazy" alt="" src="' + esc(u) + '"></button>').join('') + '</div>' : '')
+      : '<div class="gal"><div class="ph">Photos coming soon</div></div>') +
+    '<div class="titleblock"><h1>' + esc(title(c)) + '</h1>' + (c.variant ? '<div class="v">' + esc(c.variant) + '</div>' : '') +
+    '<div class="mprice"><span class="p">' + money(c.price) + '</span>' + (tel ? '<a class="btn" href="tel:' + esc(tel) + '">' + IC.phone + 'Call dealer</a>' : '') + '</div>' +
+    '<div class="keyfacts">' + (c.mileage != null ? '<span>' + IC.road + num(c.mileage) + ' miles</span>' : '') + (c.year ? '<span>' + IC.cal + c.year + '</span>' : '') +
+    (c.fuel ? '<span>' + IC.fuel + esc(c.fuel) + '</span>' : '') + (c.gearbox ? '<span>' + IC.gear + esc(c.gearbox) + '</span>' : '') + '</div></div>' +
+    '<dl class="specgrid">' + sp('Body style', c.body_type) + sp('Colour', c.colour) + sp('Engine', c.engine_cc ? (c.engine_cc / 1000).toFixed(1) + ' litre' : null) +
+    sp('Doors', c.doors) + sp('Seats', c.seats) + sp('Previous owners', c.owners) +
+    sp('MOT until', c.mot_expiry ? new Date(c.mot_expiry).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) : null) + sp('Registration', c.reg) + '</dl>' +
+    (c.description ? '<div class="about"><h2>About this car</h2><p>' + esc(c.description) + '</p></div>' : '') + '</div>' +
+    '<aside class="side"><div class="pricecard"><div class="p">' + money(c.price) + '</div>' +
+    '<div class="seller"><span class="mono">' + esc(initials(d.name)) + '</span><span><a href="#/dealer/' + esc(d.slug) + '">' + esc(d.name) + '</a><small>' + esc([d.town, d.postcode].filter(Boolean).join(', ')) +
+    (c.dist != null ? ', ' + c.dist.toFixed(1) + ' miles from ' + esc(S.origin.label) : '') + '</small></span></div>' +
+    (tel ? '<a class="btn" href="tel:' + esc(tel) + '">' + IC.phone + 'Call ' + esc(d.phone) + '</a>' : '') + '</div>' +
+    '<form class="enq" onsubmit="return sendEnquiry(event,\'' + c.id + '\')"><h2>Ask the dealer about this car</h2>' +
+    '<div class="f"><label for="en">Your name</label><input id="en" name="name" required maxlength="120" autocomplete="name"></div>' +
+    '<div class="row2 f"><div><label for="ep">Phone</label><input id="ep" name="phone" type="tel" maxlength="40" autocomplete="tel"></div><div><label for="ee">Email</label><input id="ee" name="email" type="email" maxlength="200" autocomplete="email"></div></div>' +
+    '<div class="f"><label for="em">Message</label><textarea id="em" name="message" maxlength="2000">Hi, is the ' + esc(title(c)) + ' still available?</textarea></div>' +
+    '<button class="btn dark" style="width:100%">Send to ' + esc(d.name) + '</button><div class="err" id="enqerr"></div></form></aside></div></div>';
   window.scrollTo(0, 0);
 }
-function showPhoto(el) { $('#gmain').innerHTML = '<div class="ph"><img alt="" src="' + el.src + '"></div>'; el.parentNode.querySelectorAll('img').forEach(i => i.classList.toggle('on', i === el)); }
+function galGo(step, to) {
+  const g = S.gal; if (!g || !g.list.length) return;
+  g.i = to != null ? to : (g.i + step + g.list.length) % g.list.length;
+  $('#gmain').src = g.list[g.i];
+  const ctr = $('#gctr'); if (ctr) ctr.textContent = (g.i + 1) + ' / ' + g.list.length;
+  const th = $('#thumbs'); if (th) [...th.children].forEach((b, i) => { b.classList.toggle('on', i === g.i); if (i === g.i) b.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' }); });
+}
 async function sendEnquiry(e, id) {
   e.preventDefault(); const fm = e.target, c = S.cars.find(x => x.id === id), b = $('button', fm);
   const v = k => fm[k].value.trim() || null;
-  if (!v('phone') && !v('email')) { $('#enqerr').textContent = 'Please add a phone number or email so the dealer can reply.'; return false; }
+  if (!v('phone') && !v('email')) { $('#enqerr').textContent = 'Add a phone number or email so the dealer can reply.'; return false; }
   b.disabled = true;
   const { error } = await sb.from('enquiries').insert({ car_id: c.id, dealer_id: c.dealer_id, name: v('name'), phone: v('phone'), email: v('email'), message: v('message') });
   b.disabled = false;
-  if (error) { $('#enqerr').textContent = 'Could not send: ' + error.message; return false; }
-  fm.innerHTML = '<h3 style="margin:0 0 6px">Enquiry sent ✓</h3><p class="muted" style="margin:0">' + esc(c.dealer.name) + ' has your details and will be in touch.</p>';
+  if (error) { $('#enqerr').textContent = 'Your message was not sent: ' + error.message; return false; }
+  fm.innerHTML = '<div class="done"><b>Message sent</b><span class="muted">' + esc(c.dealer.name) + ' has your details and will get back to you.</span></div>';
   return false;
 }
 async function viewDealer(slug) {
   app().innerHTML = '<div class="wrap"><div class="center">Loading…</div></div>';
   try { await loadCars(); } catch (e) { return fail(e); }
   const { data: d } = await sb.from('dealers').select('*').eq('slug', slug).eq('status', 'approved').maybeSingle();
-  if (!d) { app().innerHTML = '<div class="wrap"><div class="center">Dealer not found.</div></div>'; return; }
-  const list = S.cars.filter(c => c.dealer_id === d.id);
-  app().innerHTML = '<div class="wrap"><div class="panel" style="margin-top:18px"><h1 style="margin:0;letter-spacing:-.5px">' + esc(d.name) + '</h1><div class="muted">' + esc([d.address, d.town, d.postcode].filter(Boolean).join(', ')) + '</div>' +
-    (d.about ? '<p style="white-space:pre-wrap">' + esc(d.about) + '</p>' : '') +
-    '<div class="acts" style="margin-top:10px">' + (d.phone ? '<a class="btn dark" href="tel:' + esc(String(d.phone).replace(/[^0-9+]/g, '')) + '">Call ' + esc(d.phone) + '</a>' : '') +
-    (d.website && /^https?:\/\//i.test(d.website) ? '<a class="btn ghost" target="_blank" rel="noopener" href="' + esc(d.website) + '">Website</a>' : '') + '</div></div>' +
-    '<div class="bar"><h2>' + list.length + ' car' + (list.length === 1 ? '' : 's') + ' in stock</h2></div><div class="cards">' + list.map(cardHtml).join('') + '</div></div>';
+  if (!d) { app().innerHTML = '<div class="wrap"><div class="empty" style="margin-top:30px"><b>Dealer not found</b><a class="btn" href="#/">Browse all cars</a></div></div>'; return; }
+  const list = S.cars.filter(c => c.dealer_id === d.id).sort((a, b) => a.price - b.price), tel = String(d.phone || '').replace(/[^0-9+]/g, '');
+  app().innerHTML = '<section class="dhead"><div class="wrap"><div class="in"><span class="mono">' + esc(initials(d.name)) + '</span><div><h1>' + esc(d.name) + '</h1><p>' + esc([d.address, d.town, d.postcode].filter(Boolean).join(', ')) + '</p></div>' +
+    '<div class="acts">' + (tel ? '<a class="btn" href="tel:' + esc(tel) + '">' + IC.phone + 'Call ' + esc(d.phone) + '</a>' : '') +
+    (d.website && /^https?:\/\//i.test(d.website) ? '<a class="btn ghost" target="_blank" rel="noopener" href="' + esc(d.website) + '">Visit website</a>' : '') + '</div></div>' +
+    (d.about ? '<div class="about"><p>' + esc(d.about) + '</p></div>' : '') + '</div></section>' +
+    '<div class="wrap"><div class="bar"><h2>' + list.length + ' car' + (list.length === 1 ? '' : 's') + ' in stock</h2></div>' +
+    (list.length ? '<div class="cards">' + list.map(cardHtml).join('') + '</div>' : '<div class="empty"><b>No cars listed right now</b>Check back soon.</div>') + '</div>';
   window.scrollTo(0, 0);
 }
 
 // ---------- dealer sign-up ----------
 function viewJoin() {
   const f = (k, l, t, req, ph) => '<div><label>' + l + (req ? ' *' : '') + '</label><input name="' + k + '" type="' + (t || 'text') + '"' + (req ? ' required' : '') + (ph ? ' placeholder="' + ph + '"' : '') + '></div>';
-  app().innerHTML = '<section class="hero" style="padding-bottom:34px"><div class="wrap"><h1>List your stock on <em>MotorNest</em></h1><p>Reach local buyers in and around Sheffield. Your stock updates automatically from your existing system.</p></div></section>' +
+  app().innerHTML = '<section class="hero joinhero"><div class="wrap"><h1>List your stock on MotorNest</h1><p class="lede">Reach buyers across Sheffield. Your cars stay in step with your own website automatically.</p></div></section>' +
     '<div class="wrap"><form class="panel" style="margin-top:18px;max-width:760px" onsubmit="return sendJoin(event)"><h3 style="margin:0 0 4px">Apply in two minutes</h3><p class="muted" style="margin:0 0 12px">We check every dealership before it goes live. Once approved, you log in with the email below.</p>' +
     '<div class="grid g3">' + f('name', 'Dealership name', 'text', 1) + f('contact_name', 'Your name', 'text', 1) + f('phone', 'Phone', 'tel', 1) + f('email', 'Email (your login)', 'email', 1) + f('website', 'Website', 'text', 0, 'https://…') + f('address', 'Address') + f('town', 'Town', 'text', 0, 'Sheffield') + f('postcode', 'Postcode', 'text', 1) +
     '<div><label>Cars in stock</label><select name="stock_size"><option value="">Select</option><option>1 to 20</option><option>21 to 50</option><option>51 to 100</option><option>100+</option></select></div></div>' +
@@ -357,7 +618,7 @@ async function viewPortal() {
     return;
   }
   const d = S.dealer, tabs = [['stock', 'Stock'], ['enq', 'Enquiries'], ['csv', 'CSV upload'], ['feed', 'Automatic feed'], ['profile', 'Profile']];
-  app().innerHTML = '<div class="wrap"><div class="bar"><div><h2>' + esc(d.name) + ' <span class="badge ' + esc(d.status) + '">' + esc(d.status) + '</span></h2>' +
+  app().innerHTML = '<div class="wrap"><div class="portalhead"><div><h2>' + esc(d.name) + ' <span class="badge ' + esc(d.status) + '">' + esc(d.status) + '</span></h2>' +
     (S.managing ? '<span class="muted">Managing as admin · <a href="#/admin" onclick="S.managing=false;S.dealer=S.myDealers[0]||null">back to admin</a></span>' : '') + '</div>' +
     (d.status === 'approved' ? '<a class="btn ghost sm" href="#/dealer/' + esc(d.slug) + '">View public page</a>' : '') + '</div>' +
     (d.status !== 'approved' ? '<div class="note">This dealership is <b>' + esc(d.status) + '</b>. Cars will not show on MotorNest until it is approved.</div>' : '') +
