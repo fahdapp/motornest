@@ -719,6 +719,7 @@ async function viewCar(id) {
   const c = S.cars.find(x => x.id === id);
   if (!c) { app().innerHTML = '<div class="wrap"><div class="empty" style="margin-top:30px"><b>This car has been sold or taken off sale</b>There are plenty more like it.<br><br><a class="btn" href="#/">Browse all cars</a></div></div>'; return; }
   const d = c.dealer, tel = String(d.phone || '').replace(/[^0-9+]/g, '');
+  if (!S.user && !/bot|crawl|spider|preview/i.test(navigator.userAgent)) logTap(c.dealer_id, c.id, 'view'); // counted for the dealer's monthly report (not dealers or staff signed in)
   const sp = (l, v) => v == null || v === '' ? '' : '<div><dt>' + l + '</dt><dd>' + esc(v) + '</dd></div>';
   S.gal = { list: c.photos.map(p => photoUrl(p.path)), i: 0 }; seen(c.id);
   const alike = S.cars.filter(x => x.id !== c.id && x.body_type === c.body_type && x.price > 0 && Math.abs(x.price - c.price) <= Math.max(1500, c.price * 0.35)).sort((a, b) => Math.abs(a.price - c.price) - Math.abs(b.price - c.price));
@@ -764,7 +765,7 @@ function galGo(step, to) {
 function logTap(dealer, car, kind) {
   try {
     const k = 'mn_tap_' + kind + '_' + (car || dealer), now = Date.now(), last = +(sessionStorage.getItem(k) || 0);
-    if (now - last < 60000) return; sessionStorage.setItem(k, String(now));
+    if (now - last < (kind === 'view' ? 1800000 : 60000)) return; sessionStorage.setItem(k, String(now));
   } catch (e) { }
   fetch(SB_URL + '/rest/v1/rpc/log_contact', { method: 'POST', keepalive: true, headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ p_dealer: dealer, p_car: car, p_kind: kind }) }).catch(() => { });
 }
@@ -957,8 +958,8 @@ async function tabEnq() {
   const [{ data, error }, t] = await Promise.all([sb.from('enquiries').select('*,car:cars!enquiries_car_id_fkey(make,model,year,reg)').eq('dealer_id', S.dealer.id).order('created_at', { ascending: false }).limit(300),
     sb.from('contact_events').select('kind').eq('dealer_id', S.dealer.id).gte('created_at', d30).limit(20000)]);
   if (error) throw error;
-  const calls = (t.data || []).filter(x => x.kind === 'call').length, msgs = data.filter(x => x.created_at >= d30).length;
-  $('#tab').innerHTML = '<div class="kpis" style="margin-bottom:12px"><div class="kpi"><b>' + calls + '</b><span>Calls from MotorNest</span><small>last 30 days</small></div><div class="kpi"><b>' + msgs + '</b><span>Messages</span><small>last 30 days</small></div></div>' + (data.length ? data.map(enqRow).join('') : '<div class="center">No messages yet. They will appear here, and be emailed to you, as soon as a customer sends one.</div>');
+  const views = (t.data || []).filter(x => x.kind === 'view').length, calls = (t.data || []).filter(x => x.kind === 'call').length, msgs = data.filter(x => x.created_at >= d30).length;
+  $('#tab').innerHTML = '<div class="kpis" style="margin-bottom:12px"><div class="kpi"><b>' + num(views) + '</b><span>Car views</span><small>last 30 days</small></div><div class="kpi"><b>' + calls + '</b><span>Calls from MotorNest</span><small>last 30 days</small></div><div class="kpi"><b>' + msgs + '</b><span>Messages</span><small>last 30 days</small></div></div>' + (data.length ? data.map(enqRow).join('') : '<div class="center">No messages yet. They will appear here, and be emailed to you, as soon as a customer sends one.</div>');
 }
 function enqMail(q) {
   if (q.emailed_at) return '<div><small style="color:#1D6B47">✓ Emailed to ' + esc(q.emailed_to) + '</small></div>';
@@ -1127,7 +1128,7 @@ async function boLoad() {
     sb.from('dealer_invites').select('*'),
     sb.from('dealer_applications').select('id,status'),
     sb.from('feed_runs').select('dealer_id,ran_at,note').order('ran_at', { ascending: false }).limit(300),
-    sb.from('contact_events').select('dealer_id,kind').gte('created_at', d30).limit(20000),
+    sb.from('contact_events').select('dealer_id,kind').in('kind', ['call', 'website']).gte('created_at', d30).limit(20000),
   ]);
   for (const x of [d, c, e, f, b, i, a, r, t]) if (x.error) throw x.error;
   const by = (rows, k = 'dealer_id') => { const m = {}; for (const x of rows) (m[x[k]] = m[x[k]] || []).push(x); return m; };
