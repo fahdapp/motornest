@@ -320,6 +320,18 @@ footer a:hover{color:#fff}
 .dlbody .panel{margin:10px 0;background:#fff}
 .dlbody p{overflow-wrap:anywhere}
 .dlbody h3{margin:0 0 10px;font-size:17px}
+/* back office leads */
+.lperiod{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.lperiod .chip{border:1px solid #DCE3EA;background:#fff;border-radius:999px;padding:8px 14px;font:inherit;font-weight:600;cursor:pointer;min-height:40px}
+.lperiod .chip.on{background:var(--ink,#13202E);color:#fff;border-color:transparent}
+.lcar{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid #E6EAEF;border-radius:14px;padding:10px;margin-top:10px}
+.lcar img,.lnoimg{width:92px;height:69px;border-radius:10px;object-fit:cover;flex:none;background:#E9EDF1}
+.lcar .info{flex:1;min-width:0}.lcar .info b{display:block}.lcar .info small{color:var(--mute)}
+.lcounts{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px}
+.lc{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:700;padding:4px 9px;border-radius:999px}
+.lc svg{width:14px;height:14px}
+.lc.call{background:#E3F2EA;color:#145A3B}.lc.msg{background:#E7EEF8;color:#1F3F6B}
+.lmsg{border-top:1px solid #EEF1F4;margin-top:8px;padding-top:8px;font-size:14px;overflow-wrap:anywhere}
 
 /* portal + admin (kept simple) */
 .panel{background:var(--card);border-radius:18px;padding:18px;border:1px solid #E6EAEF}
@@ -1099,7 +1111,7 @@ async function saveProfile(e) {
 }
 
 // ---------- back office (site owner) ----------
-const BO_TABS = [['home', 'Overview'], ['dealers', 'Dealerships'], ['apps', 'Applications'], ['cars', 'All cars'], ['enq', 'Enquiries']];
+const BO_TABS = [['home', 'Overview'], ['leads', 'Leads'], ['dealers', 'Dealerships'], ['apps', 'Applications'], ['cars', 'All cars'], ['enq', 'Enquiries']];
 async function viewAdmin() {
   if (!S.user) { location.hash = '#/portal'; return; }
   if (!S.isAdmin) { app().innerHTML = '<div class="wrap"><div class="center">Back office is for the site owner only.</div></div>'; return; }
@@ -1107,7 +1119,7 @@ async function viewAdmin() {
   app().innerHTML = '<div class="wrap"><div class="portalhead"><h2>Back office</h2><span class="muted">Every dealership on MotorNest, in one place</span></div><div class="tabs">' +
     BO_TABS.map(t => '<button class="tab' + (S.atab === t[0] ? ' on' : '') + '" onclick="S.atab=\'' + t[0] + '\';viewAdmin()">' + t[1] + '</button>').join('') +
     '</div><div id="tab"><div class="center">Loading…</div></div></div>';
-  try { await ({ home: boHome, dealers: adDealers, apps: adApps, cars: adCars, enq: adEnq }[S.atab])(); } catch (e) { fail(e); }
+  try { await ({ home: boHome, leads: adLeads, dealers: adDealers, apps: adApps, cars: adCars, enq: adEnq }[S.atab])(); } catch (e) { fail(e); }
 }
 const gbp = n => '£' + Number(n || 0).toLocaleString('en-GB', { minimumFractionDigits: Number(n) % 1 ? 2 : 0, maximumFractionDigits: 2 });
 function since(t) {
@@ -1289,6 +1301,44 @@ async function adCars() {
     (c.status === 'live' ? '<button class="btn ghost sm" onclick="adCarStatus(\'' + c.id + '\',\'draft\')">Hide</button>' : '<button class="btn ghost sm" onclick="adCarStatus(\'' + c.id + '\',\'live\')">Make live</button>') + '</div></div>').join('') || '<div class="center">No listings yet.</div>';
 }
 async function adCarStatus(id, st) { const { error } = await sb.from('cars').update({ status: st }).eq('id', id); if (error) return fail(error); S.cars = null; adCars(); }
+// Leads: per dealership, only the cars buyers have called or messaged about
+async function adLeads() {
+  const days = S.lperiod ?? 30, from = days ? new Date(Date.now() - days * 864e5).toISOString() : '2000-01-01';
+  let q1 = sb.from('contact_events').select('dealer_id,car_id,created_at').eq('kind', 'call').gte('created_at', from).order('created_at', { ascending: false }).limit(10000);
+  let q2 = sb.from('enquiries').select('id,dealer_id,car_id,created_at,name,phone,email,message,status').gte('created_at', from).order('created_at', { ascending: false }).limit(5000);
+  const [ev, enq, dl] = await Promise.all([q1, q2, sb.from('dealers').select('id,name,slug').order('name')]);
+  if (ev.error) throw ev.error; if (enq.error) throw enq.error; if (dl.error) throw dl.error;
+  const ids = [...new Set([...ev.data, ...enq.data].map(x => x.car_id).filter(Boolean))];
+  const cars = new Map();
+  for (let i = 0; i < ids.length; i += 150) {
+    const { data, error } = await sb.from('cars').select('id,make,model,variant,year,price,reg,status,photos:car_photos!car_photos_car_id_fkey(path,sort_order)').in('id', ids.slice(i, i + 150));
+    if (error) throw error; for (const c of data) cars.set(c.id, c);
+  }
+  const by = {};
+  const get = (d, c) => { const D = by[d] ||= { calls: 0, msgs: 0, last: '', cars: {} }; const C = D.cars[c || '_'] ||= { calls: 0, msgs: [], last: '' }; return [D, C]; };
+  for (const x of ev.data) { const [D, C] = get(x.dealer_id, x.car_id); D.calls++; C.calls++; if (x.created_at > D.last) D.last = x.created_at; if (x.created_at > C.last) C.last = x.created_at; }
+  for (const x of enq.data) { const [D, C] = get(x.dealer_id, x.car_id); D.msgs++; C.msgs.push(x); if (x.created_at > D.last) D.last = x.created_at; if (x.created_at > C.last) C.last = x.created_at; }
+  const periods = [[7, '7 days'], [30, '30 days'], [90, '90 days'], [0, 'All time']];
+  const bar = '<div class="lperiod">' + periods.map(p => '<button class="chip' + (days === p[0] ? ' on' : '') + '" onclick="S.lperiod=' + p[0] + ';adLeads()">' + p[1] + '</button>').join('') + '</div>';
+  const list = dl.data.filter(d => by[d.id]).sort((a, b) => (by[b.id].calls + by[b.id].msgs) - (by[a.id].calls + by[a.id].msgs) || (by[b.id].last > by[a.id].last ? 1 : -1));
+  const pl = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
+  const carRow = (id, C) => {
+    const c = cars.get(id), ph = c && c.photos && c.photos.length ? c.photos.slice().sort((a, b) => a.sort_order - b.sort_order)[0].path : null;
+    const name = id === '_' ? 'Dealer page (no particular car)' : c ? title(c) : 'Car no longer on MotorNest';
+    const sub = c ? [c.price ? money(c.price) : '', c.reg, c.status !== 'live' ? 'SOLD / OFF SALE' : ''].filter(Boolean).join(' · ') : '';
+    const msgs = C.msgs.map(m => '<div class="lmsg"><b>' + esc(m.name) + '</b> <small class="muted">' + since(m.created_at) + '</small><div>' + (m.phone ? '<a href="tel:' + esc(m.phone.replace(/[^0-9+]/g, '')) + '">' + esc(m.phone) + '</a> ' : '') + (m.email ? '<a href="mailto:' + esc(m.email) + '">' + esc(m.email) + '</a>' : '') + '</div>' + (m.message ? '<div class="muted" style="white-space:pre-wrap">' + esc(m.message) + '</div>' : '') + '</div>').join('');
+    return '<div class="lcar">' + (ph ? '<img src="' + esc(photoUrl(ph)) + '" alt="" loading="lazy">' : '<div class="lnoimg"></div>') +
+      '<div class="info"><b>' + (c && c.status === 'live' ? '<a href="#/car/' + c.id + '">' + esc(name) + '</a>' : esc(name)) + '</b>' + (sub ? '<small>' + esc(sub) + '</small>' : '') +
+      '<div class="lcounts">' + (C.calls ? '<span class="lc call">' + IC.phone + pl(C.calls, 'call') + '</span>' : '') + (C.msgs.length ? '<span class="lc msg">✉ ' + pl(C.msgs.length, 'message') + '</span>' : '') + '<small class="muted">last ' + since(C.last) + '</small></div>' + msgs + '</div></div>';
+  };
+  $('#tab').innerHTML = bar + (list.length ? list.map(d => {
+    const D = by[d.id], carIds = Object.keys(D.cars).sort((a, b) => (D.cars[b].calls + D.cars[b].msgs.length) - (D.cars[a].calls + D.cars[a].msgs.length) || (D.cars[b].last > D.cars[a].last ? 1 : -1));
+    const nCars = carIds.filter(x => x !== '_').length;
+    return '<div class="dl" id="ld-' + d.id + '"><div class="dltop" onclick="this.parentNode.classList.toggle(\'open\')"><div class="info"><b>' + esc(d.name) + '</b><small>' + pl(D.calls, 'call') + ' · ' + pl(D.msgs, 'message') + ' · ' + pl(nCars, 'car') + ' · last ' + since(D.last) + '</small></div><span class="chev">›</span></div>' +
+      '<div class="dlbody">' + carIds.map(id => carRow(id, D.cars[id])).join('') + '</div></div>';
+  }).join('') : '<div class="center">No calls or messages in this period yet. When a buyer taps Call or sends a message, it shows here under the dealership.</div>');
+}
+
 async function adEnq() {
   const { data, error } = await sb.from('enquiries').select('*,car:cars!enquiries_car_id_fkey(make,model,year,reg),dealer:dealers!enquiries_dealer_id_fkey(name)').order('created_at', { ascending: false }).limit(300); if (error) throw error;
   $('#tab').innerHTML = data.map(enqRow).join('') || '<div class="center">No enquiries yet.</div>';
