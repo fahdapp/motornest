@@ -266,6 +266,15 @@ footer a:hover{color:#fff}
 .dhead .about{margin-top:20px;background:rgba(255,255,255,.05);border:0;color:#D5DEE7}
 
 
+/* buyer alerts */
+.baracts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.alertbtn{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.sheet{position:fixed;inset:0;background:rgba(19,32,46,.55);z-index:80;display:flex;align-items:flex-end;justify-content:center}
+@media(min-width:640px){.sheet{align-items:center}}
+.sheetbox{background:#fff;width:100%;max-width:440px;border-radius:20px 20px 0 0;padding:22px 20px 24px;position:relative}
+@media(min-width:640px){.sheetbox{border-radius:20px}}
+.sheetbox h2{font-size:22px;display:flex;gap:8px;align-items:center;margin:0 30px 6px 0}
+.sheetbox .x{position:absolute;top:12px;right:12px;border:0;background:#F1F3F5;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer}
 /* privacy policy and terms */
 .legal{max-width:760px;margin:26px auto 40px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px 22px 26px}
 .legal h1{font-size:32px;margin-bottom:4px}.legal h2{font-size:21px;margin:26px 0 8px}.legal h3{font-size:17px;margin:18px 0 6px}
@@ -356,6 +365,8 @@ pre.code{background:var(--ink);color:#D8E2F3;padding:12px;border-radius:12px;ove
 <p>The legal basis is that you have asked us to put you in touch with the dealer (taking steps at your request), and our legitimate interest in running a reliable marketplace, for example spotting spam.</p>
 <h3>When you tap "Call" or "Visit website"</h3>
 <p>We count the tap so we can tell each dealer how many people contacted them through MotorNest. We do not record your phone number, your name or anything that identifies you. The call itself goes straight from your phone to the dealer.</p>
+<h3>Email alerts</h3>
+<p>If you ask for a price drop alert or for new cars matching a search, we keep your email address, the car or search you chose, and when we last emailed you. We first send one email asking you to confirm; nothing else is sent unless you do. Every alert email has a link to stop it, and you can stop all alerts at once. We use your email only for these alerts (your consent). Unconfirmed alerts are deleted after 7 days and stopped alerts after 30 days.</p>
 <h3>Saved cars and recently viewed cars</h3>
 <p>The hearts you tap and the cars you have recently looked at are kept only on your own device (in your browser's storage). We do not receive them. Clearing your browser data removes them.</p>
 <h3>Your location</h3>
@@ -370,7 +381,7 @@ pre.code{background:var(--ink);color:#D8E2F3;padding:12px;border-radius:12px;ove
 <p>Some of these companies are based in the United States. Where your data may be accessed from outside the UK, they are bound by the UK's approved safeguards (the International Data Transfer Addendum or the UK–US data bridge).</p>
 <p>We never sell your personal information or share it for marketing.</p>
 <h2>How long we keep it</h2>
-<ul><li>Enquiries you send: 24 months, then deleted automatically.</li><li>Call and website tap counts: kept as anonymous numbers.</li><li>Dealer accounts: while the dealer uses MotorNest, and up to 12 months after they leave.</li></ul>
+<ul><li>Enquiries you send: 24 months, then deleted automatically.</li><li>Email alerts: until you stop them; unconfirmed alerts 7 days, stopped alerts 30 days.</li><li>Call and website tap counts: kept as anonymous numbers.</li><li>Dealer accounts: while the dealer uses MotorNest, and up to 12 months after they leave.</li></ul>
 <h2>Your rights</h2>
 <p>Under UK data protection law you can ask us for a copy of your information, ask us to correct it or delete it, object to how we use it, or ask us to limit how we use it. Email <a href="mailto:alawi399399@gmail.com">alawi399399@gmail.com</a> and we will reply within one month. To have your details removed from a dealer's own records, please also contact that dealer.</p>
 <p>If you are unhappy with how we have handled your information, you can complain to the Information Commissioner's Office at <a href="https://ico.org.uk" target="_blank" rel="noopener">ico.org.uk</a> or on 0303 123 1113.</p>
@@ -468,6 +479,7 @@ function mixCars() {
 function setDistances() { (S.cars || []).forEach(c => c.dist = miles(S.origin, c.dealer)); }
 // ---------- icons ----------
 const IC = {
+  bell: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>',
   road: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 21 9 3M19 21 15 3M12 6v2M12 11v2M12 16v2"/></svg>',
   fuel: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16M3 21h12M4 10h10M14 8h2a2 2 0 0 1 2 2v6a1.5 1.5 0 0 0 3 0V8l-3-3"/></svg>',
   gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="5" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="12" cy="19" r="2"/><path d="M5 7v10M12 7v10M19 7v5H5"/></svg>',
@@ -675,7 +687,7 @@ function renderResults() {
   const shown = S.shown || 24;
   const active = Object.keys(FILTER_NAMES).filter(k => f[k]);
   $('#results').innerHTML = '<div class="bar" style="margin-top:44px"><h2>' + (active.length ? '' : 'All ') + num(list.length) + ' car' + (list.length === 1 ? '' : 's') + (S.origin !== SHEFFIELD ? ' near ' + esc(S.origin.label) : '') + '</h2>' +
-    '<select class="sortsel" aria-label="Sort cars" onchange="setF(\'sort\',this.value)">' + [['mix', 'Recommended'], ['plo', 'Lowest price'], ['phi', 'Highest price'], ['mil', 'Lowest mileage'], ['near', 'Nearest to you'], ['new', 'Newest listed']].map(o => '<option value="' + o[0] + '"' + (s === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></div>' +
+    '<span class="baracts"><button class="btn ghost sm alertbtn" onclick="alertSheet(\'search\')">' + IC.bell + 'Email me new matches</button><select class="sortsel" aria-label="Sort cars" onchange="setF(\'sort\',this.value)">' + [['mix', 'Recommended'], ['plo', 'Lowest price'], ['phi', 'Highest price'], ['mil', 'Lowest mileage'], ['near', 'Nearest to you'], ['new', 'Newest listed']].map(o => '<option value="' + o[0] + '"' + (s === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></span></div>' +
     (active.length ? '<div class="active-filters">' + active.map(k => '<button class="afl" onclick="clearF(\'' + k + '\')" aria-label="Remove filter">' + esc(FILTER_NAMES[k](f[k])) + '<span>✕</span></button>').join('') + '</div>' : '') +
     (list.length ? '<div class="cards">' + list.slice(0, shown).map(cardHtml).join('') + '</div>' +
       (list.length > shown ? '<div class="loadmore"><button class="btn ghost" onclick="S.shown=(S.shown||24)+24;renderResults()">Show more cars (' + num(list.length - shown) + ' left)</button></div>' : '')
@@ -708,7 +720,8 @@ async function viewCar(id) {
     '<aside class="side"><div class="pricecard"><div class="p">' + money(c.price) + '</div>' +
     '<div class="seller"><span class="mono">' + esc(initials(d.name)) + '</span><span><a href="#/dealer/' + esc(d.slug) + '">' + esc(d.name) + '</a><small>' + esc([d.town, d.postcode].filter(Boolean).join(', ')) +
     (c.dist != null ? ', ' + c.dist.toFixed(1) + ' miles from ' + esc(S.origin.label) : '') + '</small></span></div>' +
-    (tel ? '<a class="btn" href="tel:' + esc(tel) + '" onclick="logTap(\'' + c.dealer_id + '\',\'' + c.id + '\',\'call\')">' + IC.phone + 'Call ' + esc(d.phone) + '</a>' : '') + '</div>' +
+    (tel ? '<a class="btn" href="tel:' + esc(tel) + '" onclick="logTap(\'' + c.dealer_id + '\',\'' + c.id + '\',\'call\')">' + IC.phone + 'Call ' + esc(d.phone) + '</a>' : '') +
+    '<button class="btn ghost alertbtn" style="margin-top:8px;width:100%" onclick="alertSheet(\'car\',\'' + c.id + '\')">' + IC.bell + 'Price drop alert</button></div>' +
     '<form class="enq" onsubmit="return sendEnquiry(event,\'' + c.id + '\')"><h2>Ask the dealer about this car</h2>' +
     '<div class="f"><label for="en">Your name</label><input id="en" name="name" required maxlength="120" autocomplete="name"></div>' +
     '<div class="row2 f"><div><label for="ep">Phone</label><input id="ep" name="phone" type="tel" maxlength="40" autocomplete="tel"></div><div><label for="ee">Email</label><input id="ee" name="email" type="email" maxlength="200" autocomplete="email"></div></div>' +
@@ -1261,6 +1274,46 @@ async function adEnq() {
   $('#tab').innerHTML = data.map(enqRow).join('') || '<div class="center">No enquiries yet.</div>';
 }
 
+// ---------- buyer email alerts ----------
+function alertLabel() {
+  const f = S.f, parts = [];
+  if (f.make) parts.push(f.model ? f.make + ' ' + f.model : f.make); if (f.body) parts.push(f.body);
+  if (f.fuel) parts.push(f.fuel); if (f.gear) parts.push(f.gear);
+  if (f.pmin && f.pmax) parts.push(money(f.pmin) + '–' + money(f.pmax)); else if (f.pmax) parts.push('under ' + money(f.pmax)); else if (f.pmin) parts.push('over ' + money(f.pmin));
+  if (f.miles) parts.push('under ' + num(f.miles) + ' miles'); if (f.dist) parts.push('within ' + f.dist + ' miles of ' + S.origin.label);
+  return parts.join(', ') || 'any used car';
+}
+function alertSheet(kind, carId) {
+  const c = carId && S.cars.find(x => x.id === carId);
+  const what = kind === 'car' ? 'We\'ll email you if the price of the <b>' + esc(title(c)) + '</b> drops (now ' + money(c.price) + ').' : 'We\'ll email you once a day when new cars match: <b>' + esc(alertLabel()) + '</b>.';
+  let saved = ''; try { saved = localStorage.getItem('mn_email') || ''; } catch (e) { }
+  const el = document.createElement('div'); el.className = 'sheet'; el.id = 'sheet';
+  el.innerHTML = '<div class="sheetbox" role="dialog" aria-modal="true" aria-labelledby="sheett"><button class="x" aria-label="Close" onclick="closeSheet()">✕</button>' +
+    '<h2 id="sheett">' + IC.bell + (kind === 'car' ? 'Price drop alert' : 'Email me new matches') + '</h2><p>' + what + '</p>' +
+    '<form onsubmit="return saveAlert(event,\'' + kind + '\',' + (carId ? '\'' + carId + '\'' : 'null') + ')"><label for="alem">Your email</label><input id="alem" name="email" type="email" required autocomplete="email" value="' + esc(saved) + '">' +
+    '<button class="btn dark" style="width:100%;margin-top:10px">Send me alerts</button><div class="err" id="alerr"></div>' +
+    '<p class="fine">We\'ll send one email to confirm first. Every alert email has a link to stop it. <a href="#/privacy" onclick="closeSheet()">Privacy policy</a></p></form></div>';
+  el.addEventListener('click', e => { if (e.target === el) closeSheet(); });
+  document.body.appendChild(el); setTimeout(() => { const i = $('#alem'); if (i && !i.value) i.focus(); }, 50);
+}
+function closeSheet() { const el = $('#sheet'); if (el) el.remove(); }
+async function saveAlert(e, kind, carId) {
+  e.preventDefault(); const fm = e.target, b = $('button', fm), email = fm.email.value.trim();
+  const f = {}; if (kind === 'search') { for (const k of ['make', 'model', 'pmin', 'pmax', 'miles', 'fuel', 'gear', 'body', 'dist']) if (S.f[k]) f[k] = S.f[k]; if (f.dist) { f.lat = S.origin.lat; f.lng = S.origin.lng; } }
+  b.disabled = true;
+  const { data, error } = await sb.rpc('alert_create', { p_email: email, p_kind: kind, p_filters: f, p_label: kind === 'search' ? alertLabel() : null, p_car: carId });
+  b.disabled = false;
+  if (error) { $('#alerr').textContent = error.message; return false; }
+  try { localStorage.setItem('mn_email', email); } catch (x) { }
+  fm.innerHTML = data === 'already' ? '<div class="done"><b>You already have this alert</b><span class="muted">It\'s switched on for ' + esc(email) + '.</span></div>'
+    : '<div class="done"><b>Check your email</b><span class="muted">We\'ve sent a link to ' + esc(email) + '. Tap it to switch the alert on. (Check spam if you can\'t see it.)</span></div>';
+  return false;
+}
+function viewAlertMsg(st) {
+  const m = { confirmed: ['Your alert is on', 'We\'ll email you when there\'s news. Every email has a link to stop it.'], stopped: ['Alert stopped', 'You won\'t get that alert any more.'], stoppedall: ['All alerts stopped', 'You won\'t get any more MotorNest alert emails.'] }[st] || ['That link didn\'t work', 'It may be old or already used. You can set up a new alert from any search or car.'];
+  app().innerHTML = '<div class="wrap"><div class="empty" style="margin-top:30px"><b>' + m[0] + '</b>' + m[1] + '<br><br><a class="btn" href="#/">Browse cars</a></div></div>';
+}
+
 // ---------- privacy policy and terms ----------
 function viewLegal(kind) {
   const t = document.getElementById('legal-' + kind);
@@ -1280,6 +1333,7 @@ function route() {
   if (p === 'saved') return viewSaved();
   if (p === 'join') return viewJoin();
   if (p === 'privacy' || p === 'terms') return viewLegal(p);
+  if (p === 'alerts') return viewAlertMsg(a);
   if (p === 'portal') return viewPortal();
   if (p === 'admin') return viewAdmin();
   return viewHome();
