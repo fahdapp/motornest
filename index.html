@@ -388,10 +388,15 @@ async function geocode(pc) {
 // ---------- public data ----------
 async function loadCars(force) {
   if (S.cars && !force) return S.cars;
-  const { data, error } = await sb.from('cars')
-    .select('id,reg,make,model,variant,year,price,mileage,fuel,gearbox,body_type,colour,engine_cc,doors,seats,owners,mot_expiry,description,created_at,dealer_id,dealer:dealers!cars_dealer_id_fkey(id,name,slug,town,postcode,lat,lng,phone,email,status),photos:car_photos!car_photos_car_id_fkey(path,sort_order)')
-    .eq('status', 'live').order('created_at', { ascending: false }).limit(1000);
-  if (error) throw error;
+  const data = [];
+  for (let from = 0; ; from += 1000) {
+    const r = await sb.from('cars')
+      .select('id,reg,make,model,variant,year,price,mileage,fuel,gearbox,body_type,colour,engine_cc,doors,seats,owners,mot_expiry,description,created_at,dealer_id,dealer:dealers!cars_dealer_id_fkey(id,name,slug,town,postcode,lat,lng,phone,email,status),photos:car_photos!car_photos_car_id_fkey(path,sort_order)')
+      .eq('status', 'live').order('created_at', { ascending: false }).order('id').range(from, from + 999);
+    if (r.error) throw r.error;
+    data.push(...r.data);
+    if (r.data.length < 1000) break;
+  }
   S.cars = data.filter(c => c.dealer && c.dealer.status === 'approved');
   S.cars.forEach(c => c.photos.sort((a, b) => a.sort_order - b.sort_order));
   mixCars();
@@ -659,6 +664,7 @@ async function viewCar(id) {
     '<div class="stickybar"><span class="p">' + money(c.price) + '</span>' + (tel ? '<a class="btn dark" href="tel:' + esc(tel) + '" onclick="logTap(\'' + c.dealer_id + '\',\'' + c.id + '\',\'call\')">' + IC.phone + 'Call</a>' : '') +
     '<button class="btn" onclick="document.querySelector(\'.enq\').scrollIntoView({behavior:\'smooth\'});setTimeout(()=>document.getElementById(\'en\').focus(),400)">Message</button></div>';
   document.body.classList.add('has-sticky');
+  document.title = title(c) + ' for sale | ' + money(c.price) + ' | MotorNest';
   window.scrollTo(0, 0);
 }
 function galGo(step, to) {
@@ -1203,6 +1209,7 @@ async function adEnq() {
 
 // ---------- router ----------
 function route() {
+  document.title = 'MotorNest | Used cars from trusted Sheffield dealers';
   const h = location.hash.replace(/^#\/?/, ''), i = h.indexOf('/'), p = i < 0 ? h : h.slice(0, i), a = i < 0 ? '' : h.slice(i + 1);
   nav();
   if (p !== 'car') document.body.classList.remove('has-sticky');
@@ -1216,6 +1223,8 @@ function route() {
 }
 window.addEventListener('hashchange', route);
 (async function () {
+  // Pages built for Google (/cars/<name>/, /dealers/<name>/) say which screen to open
+  if (window.MN_ROUTE && !location.hash) history.replaceState(null, '', location.pathname + location.search + window.MN_ROUTE);
   try { const { data } = await sb.auth.getSession(); S.user = data.session ? data.session.user : null; await loadAccess(); } catch (e) { console.error(e); }
   route();
 })();
