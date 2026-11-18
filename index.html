@@ -162,7 +162,12 @@ body.has-sticky{padding-bottom:78px}
 .car{display:flex;flex-direction:column;text-decoration:none;color:var(--ink);background:var(--card);border-radius:18px;overflow:hidden;border:1px solid #E6EAEF}
 .car .pic{position:relative;aspect-ratio:4/3;background:var(--sky)}
 .car .pic img{width:100%;height:100%;object-fit:cover;display:block}
-.car .price{position:absolute;left:12px;bottom:12px;background:var(--straw);color:var(--ink);font-family:var(--display);font-weight:800;font-size:21px;letter-spacing:-.02em;padding:5px 12px;border-radius:10px}
+.car .pricewrap{position:absolute;left:12px;bottom:12px;right:60px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.rate{display:inline-flex;align-items:center;gap:4px;font-weight:700;font-size:13px;padding:5px 9px;border-radius:999px;line-height:1.1;box-shadow:0 1px 3px rgba(0,0,0,.18);white-space:nowrap}
+.rate-great{background:#1F8A5B;color:#fff}.rate-good{background:#D9F2E4;color:#145A3B}.rate-fair{background:#E7EDF3;color:#13202E}.rate-high{background:#FCE4DA;color:#9A3412}
+.rate.big{font-size:15px;padding:6px 12px;box-shadow:none}
+.ratebox{margin-top:12px}.ratebox small{display:block;color:#AEBBC9;font-size:13.5px;margin-top:6px;line-height:1.45}
+.car .price{background:var(--straw);color:var(--ink);font-family:var(--display);font-weight:800;font-size:21px;letter-spacing:-.02em;padding:5px 12px;border-radius:10px}
 .car .count{position:absolute;right:10px;top:10px;background:rgba(19,32,46,.72);color:#fff;font-size:12px;font-weight:600;padding:4px 8px;border-radius:7px;display:flex;align-items:center;gap:5px}
 .car .count svg{width:13px;height:13px}
 .car .b{padding:14px 16px 16px;display:flex;flex-direction:column;gap:4px;flex:1}
@@ -484,8 +489,44 @@ async function loadCars(force) {
   S.cars.forEach(c => c.photos.sort((a, b) => a.sort_order - b.sort_order));
   mixCars();
   setDistances();
+  rateCars();
   return S.cars;
 }
+// ---------- price rating: compare each car with similar cars on MotorNest ----------
+// Similar = same make and model, within 3 years. Each one is adjusted for age (about 12% a year) and mileage
+// (about 0.4% per 1,000 miles), and the middle value is the expected price. No badge with fewer than 3 similar cars.
+const RATES = [[0.90, 'great', 'Great price'], [0.97, 'good', 'Good price'], [1.05, 'fair', 'Fair price'], [Infinity, 'high', 'High price']];
+function rateCars() {
+  const groups = {};
+  for (const c of S.cars) { c.rate = null; if (c.price > 0 && c.year) (groups[(c.make + '|' + c.model).toLowerCase()] ||= []).push(c); }
+  for (const list of Object.values(groups)) {
+    if (list.length < 4) continue;
+    for (const c of list) {
+      const adj = [];
+      for (const o of list) {
+        if (o === c || Math.abs(o.year - c.year) > 3) continue;
+        let f = Math.pow(1.12, c.year - o.year);
+        if (c.mileage != null && o.mileage != null) f *= Math.min(1.3, Math.max(0.7, 1 - 0.004 * (c.mileage - o.mileage) / 1000));
+        adj.push(o.price * f);
+      }
+      if (adj.length < 3) continue;
+      adj.sort((a, b) => a - b);
+      const mid = adj.length % 2 ? adj[(adj.length - 1) / 2] : (adj[adj.length / 2 - 1] + adj[adj.length / 2]) / 2;
+      const ratio = c.price / mid;
+      if (ratio < 0.55 || ratio > 1.6) continue; // so far off it is probably a different version (e.g. AMG, RS): no badge
+      const r = RATES.find(x => ratio <= x[0]);
+      c.rate = { key: r[1], label: r[2], expected: Math.round(mid / 10) * 10, n: adj.length };
+    }
+  }
+}
+const rateBadge = (c, big) => c.rate ? '<span class="rate rate-' + c.rate.key + (big ? ' big' : '') + '">' + (c.rate.key === 'great' || c.rate.key === 'good' ? IC.tag : '') + c.rate.label + '</span>' : '';
+function rateNote(c) {
+  if (!c.rate) return '';
+  const diff = c.rate.expected - c.price, what = esc(c.make + ' ' + c.model);
+  const line = Math.abs(diff) < 50 ? 'About the same as' : money(Math.abs(diff)) + (diff > 0 ? ' below' : ' above') + ' the usual price for';
+  return '<div class="ratebox">' + rateBadge(c, true) + '<small>' + line + ' a similar ' + what + ', based on ' + c.rate.n + ' similar cars on MotorNest.</small></div>';
+}
+
 function mixCars() {
   const groups = {};
   S.cars.forEach(c => (groups[c.dealer_id] = groups[c.dealer_id] || []).push(c));
@@ -497,6 +538,7 @@ function mixCars() {
 function setDistances() { (S.cars || []).forEach(c => c.dist = miles(S.origin, c.dealer)); }
 // ---------- icons ----------
 const IC = {
+  tag: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>',
   download: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>',
   bell: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>',
   road: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 21 9 3M19 21 15 3M12 6v2M12 11v2M12 16v2"/></svg>',
@@ -540,7 +582,7 @@ function cardHtml(c) {
   const p = c.photos && c.photos[0];
   return '<a class="car" href="#/car/' + c.id + '"><div class="pic">' +
     (p ? '<img loading="lazy" alt="' + esc(title(c)) + '" src="' + esc(photoUrl(p.path)) + '">' : '<div class="ph">Photo coming soon</div>') +
-    '<span class="price">' + money(c.price) + '</span>' + heartBtn(c.id) +
+    '<span class="pricewrap"><span class="price">' + money(c.price) + '</span>' + rateBadge(c) + '</span>' + heartBtn(c.id) +
     (c.photos.length > 1 ? '<span class="count">' + IC.cam + c.photos.length + '</span>' : '') + '</div>' +
     '<div class="b"><h3>' + esc(title(c)) + '</h3>' + (c.variant ? '<div class="v">' + esc(c.variant) + '</div>' : '') +
     '<div class="specs">' + (c.mileage != null ? '<span>' + IC.road + num(c.mileage) + ' mi</span>' : '') +
@@ -736,7 +778,7 @@ async function viewCar(id) {
     sp('Doors', c.doors) + sp('Seats', c.seats) + sp('Previous owners', c.owners) +
     sp('MOT until', c.mot_expiry ? new Date(c.mot_expiry).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) : null) + sp('Registration', c.reg) + '</dl>' +
     (c.description ? '<div class="about"><h2>About this car</h2><p>' + esc(c.description) + '</p></div>' : '') + '</div>' +
-    '<aside class="side"><div class="pricecard"><div class="p">' + money(c.price) + '</div>' +
+    '<aside class="side"><div class="pricecard"><div class="p">' + money(c.price) + '</div>' + rateNote(c) +
     '<div class="seller"><span class="mono">' + esc(initials(d.name)) + '</span><span><a href="#/dealer/' + esc(d.slug) + '">' + esc(d.name) + '</a><small>' + esc([d.town, d.postcode].filter(Boolean).join(', ')) +
     (c.dist != null ? ', ' + c.dist.toFixed(1) + ' miles from ' + esc(S.origin.label) : '') + '</small></span></div>' +
     (tel ? '<a class="btn" href="tel:' + esc(tel) + '" onclick="logTap(\'' + c.dealer_id + '\',\'' + c.id + '\',\'call\')">' + IC.phone + 'Call ' + esc(d.phone) + '</a>' : '') +
