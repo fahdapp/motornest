@@ -104,6 +104,15 @@ ${c.description ? `<div class="about"><h2>About this car</h2><p>${esc(c.descript
   mkdirSync("cars", { recursive: true });
   writeFileSync("cars/index.html", page(tpl, { title: `${cars.length} used cars for sale in Sheffield | MotorNest`, description: `Browse ${cars.length} used cars from ${dealers.size} trusted Sheffield and South Yorkshire dealers on MotorNest.`, canonical: `${SITE}/cars/`, body: all, route: "#/" }));
 
+  // privacy policy and terms: real pages for Google, built from the same text the app shows
+  for (const [kind, name, desc] of [["privacy", "Privacy policy", "How MotorNest collects and uses personal information, and your rights."], ["terms", "Terms of use", "The terms for using MotorNest, for car buyers and dealers."]]) {
+    const m = tpl.match(new RegExp(`<template id="legal-${kind}">([\\s\\S]*?)</template>`));
+    if (!m) continue;
+    mkdirSync(kind, { recursive: true });
+    writeFileSync(`${kind}/index.html`, page(tpl, { title: `${name} | MotorNest`, description: desc, canonical: `${SITE}/${kind}/`, body: `<div class="wrap"><article class="legal">${m[1]}</article></div>`, route: `#/${kind}` }));
+    urls.push({ loc: `${SITE}/${kind}/`, lastmod: today });
+  }
+
   // home page: real description and links to every car, for Google (the app replaces it for visitors)
   const home = page(tpl, { title: "MotorNest | Used cars from trusted Sheffield dealers", description: `${cars.length} used cars for sale from ${dealers.size} trusted Sheffield and South Yorkshire dealers. Search by make, price and distance, then call or message the dealer.`, canonical: `${SITE}/`, body: `<div class="wrap"><h1>Used cars from trusted Sheffield dealers</h1><p><a href="/cars/">Browse all ${cars.length} used cars</a></p><div class="cards">${cars.slice(0, 48).map(carCard).join("")}</div></div>` });
   writeFileSync("index.html", home);
