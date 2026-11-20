@@ -351,6 +351,9 @@ footer a:hover{color:#fff}
 .netintro b{display:block;font-size:17px}.netintro span{font-size:14px}
 .netsearch{display:grid;grid-template-columns:1fr auto auto;gap:8px;margin-bottom:12px}
 @media(max-width:600px){.netsearch{grid-template-columns:1fr 1fr}.netsearch input{grid-column:1/-1}}
+.docpack{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;background:var(--ink);color:#fff;border-radius:16px;padding:16px}
+.docpack b{display:block;font-size:18px}.docpack span{color:#AFC0D2;font-size:14px}
+.docic{width:46px;height:56px;flex:none;border-radius:8px;background:#FDECEA;color:#B3261E;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;border:1px solid #F3C9C4}
 .earn{color:#1D6B47;font-weight:700;font-size:14px;margin-top:2px}
 .owe{display:inline-block;margin-top:6px;background:#FFF1D6;color:#7A5410;font-weight:800;border-radius:10px;padding:6px 10px}
 .netnote{background:var(--straw-soft);border-radius:10px;padding:8px 10px;margin:6px 0;white-space:pre-wrap;font-size:14px}
@@ -1129,6 +1132,56 @@ async function netDo(id, action) {
   toast({ accept: 'Accepted. They have been emailed.', decline: 'Declined', sold: 'Marked as sold', not_sold: 'Updated', cancel: 'Request cancelled', paid: 'Marked as paid' }[action]);
   S.view === 'admin' ? adNet() : tabNetwork();
 }
+// ----- back office: printable agreements and policies -----
+const DOC_LIST = [
+  ['listing', 'Dealer Listing Agreement', 'The main agreement for showing their cars on MotorNest.', 'MotorNest-Dealer-Listing-Agreement', 1],
+  ['adverts', 'Advert Standards Policy', 'The rules every car advert must follow.', 'MotorNest-Advert-Standards-Policy', 1],
+  ['feed', 'Stock Feed and Photo Permission', 'Lets MotorNest copy their cars and photos automatically.', 'MotorNest-Stock-Feed-and-Photo-Permission', 1],
+  ['data', 'Data Protection Agreement', 'How buyers\' personal details are looked after (UK GDPR).', 'MotorNest-Data-Protection-Agreement', 1],
+  ['network', 'Dealer Network Referral Agreement', 'Only for dealers joining the Dealer Network: fees and rules.', 'MotorNest-Dealer-Network-Referral-Agreement', 1],
+  ['consent', 'Customer Consent Form', 'Give to dealers: their customer signs it before details go to another dealer.', 'MotorNest-Customer-Consent-Form', 0],
+  ['invoice', 'Referral Fee Invoice', 'Give to dealers: to bill another dealer for a referral fee.', 'MotorNest-Referral-Fee-Invoice', 0],
+];
+async function adDocs() {
+  if (!S.docD) {
+    const [d, b, n, s] = await Promise.all([sb.from('dealers').select('id,name,address,town,postcode,phone,email,website,status').order('name'),
+      sb.from('dealer_billing').select('dealer_id,lead_email'), sb.from('dealer_network').select('dealer_id,fee'), sb.from('dealer_documents').select('*')]);
+    if (d.error) throw d.error; if (s.error) throw s.error;
+    S.docD = { dealers: d.data, bill: b.data || [], net: n.data || [], signed: s.data || [] };
+  }
+  const X = S.docD, dl = X.dealers.find(x => x.id === S.docDealer);
+  const signed = k => dl && X.signed.find(s => s.dealer_id === dl.id && s.doc === k);
+  const q = k => {
+    const u = new URLSearchParams({ d: k });
+    if (dl) {
+      const b = X.bill.find(x => x.dealer_id === dl.id), n = X.net.find(x => x.dealer_id === dl.id);
+      u.set('n', dl.name); u.set('a', [dl.address, dl.town, dl.postcode].filter(Boolean).join(', ')); if (dl.phone) u.set('p', dl.phone);
+      const em = (b && b.lead_email) || dl.email; if (em) u.set('e', em); if (dl.website) u.set('w', dl.website); if (n) u.set('fee', n.fee);
+    }
+    return '/docs/print.html?' + u.toString();
+  };
+  const toSign = DOC_LIST.filter(x => x[4]), done = dl ? toSign.filter(x => signed(x[0])).length : 0;
+  $('#tab').innerHTML = '<div class="panel" style="margin-bottom:12px"><label>Fill the documents in for</label><select onchange="S.docDealer=this.value||null;adDocs()"><option value="">Blank (write the details by hand)</option>' +
+    X.dealers.map(x => '<option value="' + x.id + '"' + (x.id === S.docDealer ? ' selected' : '') + '>' + esc(x.name) + '</option>').join('') + '</select>' +
+    (dl ? '<p class="muted" style="margin:8px 0 0">' + done + ' of ' + toSign.length + ' signed by ' + esc(dl.name) + '. Their name, address and phone are printed in for you.</p>' : '<p class="muted" style="margin:8px 0 0">Choose a dealer to print their details in and to tick off what they have signed.</p>') + '</div>' +
+    '<div class="docpack"><div><b>Dealer sign-up pack</b><span>All 5 agreements in one print (10 pages). Print two copies: one for the dealer, one for you.</span></div><div class="acts"><a class="btn" href="' + q('pack') + '" target="_blank" rel="noopener">Open and print</a><a class="btn ghost" href="/docs/pdf/MotorNest-Dealer-Sign-Up-Pack.pdf" download>Blank PDF</a></div></div>' +
+    '<h3 style="margin:16px 0 8px">For the dealer to sign</h3>' + toSign.map(x => docRow(x, q, signed(x[0]), dl)).join('') +
+    '<h3 style="margin:16px 0 8px">Forms for dealers to use</h3>' + DOC_LIST.filter(x => !x[4]).map(x => docRow(x, q, null, null)).join('') +
+    '<div class="note" style="margin-top:14px">These are templates written in plain English. Before dealers sign, ask a solicitor to check them once, and add your business name and address at the top of each agreement.</div>';
+}
+function docRow(x, q, s, dl) {
+  return '<div class="row"><div class="docic">PDF</div><div class="info"><b>' + esc(x[1]) + (s ? ' <span class="badge live">Signed ' + new Date(s.signed_on).toLocaleDateString('en-GB') + '</span>' : '') + '</b><small>' + esc(x[2]) + '</small></div>' +
+    '<div class="acts"><a class="btn sm" href="' + q(x[0]) + '" target="_blank" rel="noopener">Open and print</a><a class="btn ghost sm" href="/docs/pdf/' + x[3] + '.pdf" download>Blank PDF</a>' +
+    (dl ? (s ? '<button class="btn ghost sm" onclick="docSign(\'' + x[0] + '\',false)">Undo signed</button>' : '<button class="btn dark sm" onclick="docSign(\'' + x[0] + '\',true)">Mark signed</button>') : '') + '</div></div>';
+}
+async function docSign(k, on) {
+  const id = S.docDealer;
+  const r = on ? await sb.from('dealer_documents').upsert({ dealer_id: id, doc: k, signed_on: new Date().toISOString().slice(0, 10) }).select().single()
+    : await sb.from('dealer_documents').delete().eq('dealer_id', id).eq('doc', k);
+  if (r.error) return fail(r.error);
+  S.docD.signed = S.docD.signed.filter(s => !(s.dealer_id === id && s.doc === k)); if (on) S.docD.signed.push(r.data);
+  toast(on ? 'Marked as signed' : 'Unmarked'); adDocs();
+}
 async function adNet() {
   S.view = 'admin';
   const [rq, mem] = await Promise.all([sb.rpc('network_list', { p_dealer: null }), sb.from('dealer_network').select('fee,joined_at,dealer:dealers!dealer_network_dealer_id_fkey(name)').order('joined_at')]);
@@ -1266,7 +1319,7 @@ async function saveProfile(e) {
 }
 
 // ---------- back office (site owner) ----------
-const BO_TABS = [['home', 'Overview'], ['leads', 'Leads'], ['net', 'Dealer Network'], ['dealers', 'Dealerships'], ['apps', 'Applications'], ['cars', 'All cars'], ['enq', 'Enquiries']];
+const BO_TABS = [['home', 'Overview'], ['leads', 'Leads'], ['net', 'Dealer Network'], ['docs', 'Documents'], ['dealers', 'Dealerships'], ['apps', 'Applications'], ['cars', 'All cars'], ['enq', 'Enquiries']];
 async function viewAdmin() {
   if (!S.user) { location.hash = '#/portal'; return; }
   if (!S.isAdmin) { app().innerHTML = '<div class="wrap"><div class="center">Back office is for the site owner only.</div></div>'; return; }
@@ -1274,7 +1327,7 @@ async function viewAdmin() {
   app().innerHTML = '<div class="wrap"><div class="portalhead"><h2>Back office</h2><span class="muted">Every dealership on MotorNest, in one place</span></div><div class="tabs">' +
     BO_TABS.map(t => '<button class="tab' + (S.atab === t[0] ? ' on' : '') + '" onclick="S.atab=\'' + t[0] + '\';viewAdmin()">' + t[1] + '</button>').join('') +
     '</div><div id="tab"><div class="center">Loading…</div></div></div>';
-  try { await ({ home: boHome, leads: adLeads, net: adNet, dealers: adDealers, apps: adApps, cars: adCars, enq: adEnq }[S.atab])(); } catch (e) { fail(e); }
+  try { await ({ home: boHome, leads: adLeads, net: adNet, docs: () => { S.docD = null; return adDocs(); }, dealers: adDealers, apps: adApps, cars: adCars, enq: adEnq }[S.atab])(); } catch (e) { fail(e); }
 }
 const gbp = n => '£' + Number(n || 0).toLocaleString('en-GB', { minimumFractionDigits: Number(n) % 1 ? 2 : 0, maximumFractionDigits: 2 });
 function since(t) {

@@ -118,7 +118,7 @@ ${c.description ? `<div class="about"><h2>About this car</h2><p>${esc(c.descript
   writeFileSync("index.html", home);
 
   writeFileSync("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `<url><loc>${esc(u.loc)}</loc><lastmod>${u.lastmod}</lastmod></url>`).join("\n")}\n</urlset>\n`);
-  writeFileSync("robots.txt", `User-agent: *\nAllow: /\nSitemap: ${SITE}/sitemap.xml\n`);
+  writeFileSync("robots.txt", `User-agent: *\nAllow: /\nDisallow: /docs/\nSitemap: ${SITE}/sitemap.xml\n`);
   console.log(`Wrote ${cars.length} car pages, ${dealers.size} dealer pages, sitemap with ${urls.length} links`);
 }
 

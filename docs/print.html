@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>MotorNest dealer documents</title>
+<style>
+@page{size:A4;margin:16mm 16mm 18mm}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,"Helvetica Neue",Arial,sans-serif;color:#13202E;font-size:10.5pt;line-height:1.45;background:#E9EDF1}
+.bar{position:sticky;top:0;z-index:5;background:#13202E;color:#fff;padding:10px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.bar b{flex:1;min-width:160px;font-size:15px}
+.bar button{font:inherit;font-weight:700;font-size:15px;border:0;border-radius:10px;padding:10px 16px;background:#FFC53D;color:#13202E;cursor:pointer}
+.bar a{color:#AFC0D2;font-size:14px}
+.doc{background:#fff;max-width:210mm;margin:14px auto;padding:16mm;box-shadow:0 4px 18px rgba(19,32,46,.12)}
+.doc+.doc{break-before:page}
+.head{display:flex;align-items:center;gap:10px;border-bottom:3px solid #FFC53D;padding-bottom:8px;margin-bottom:12px}
+.head svg{width:34px;height:34px;flex:none}
+.head .brand{font-weight:800;font-size:15pt;letter-spacing:-.01em}.head .brand span{color:#D98200}
+.head .ver{margin-left:auto;font-size:8.5pt;color:#5D6B7A;text-align:right}
+h1{font-size:17pt;margin:0 0 4px;letter-spacing:-.01em}
+.lead{color:#3C4A59;margin:0 0 12px}
+h2{font-size:11.5pt;margin:14px 0 4px;break-after:avoid}
+p{margin:0 0 6px}
+ol.cl{margin:0 0 6px;padding-left:22px}ol.cl li{margin:0 0 4px}
+ul{margin:0 0 6px;padding-left:20px}ul li{margin:0 0 3px}
+.box{border:1px solid #C9D2DC;border-radius:6px;padding:8px 10px;margin:8px 0;break-inside:avoid}
+.parties{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.f{display:flex;gap:6px;align-items:flex-end;margin:5px 0}
+.f span{white-space:nowrap;color:#3C4A59;font-size:9.5pt}
+.f i{flex:1;border-bottom:1px solid #8794A3;min-height:16px;font-style:normal;font-weight:600;padding:0 2px}
+.sign{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px;break-inside:avoid}
+.sign .box{margin:0}
+.sign .f i{min-height:22px}
+.tickrow{display:flex;gap:14px;flex-wrap:wrap;margin:6px 0}
+.tk{display:inline-flex;align-items:center;gap:6px;font-weight:700}
+.tk b{display:inline-block;width:14px;height:14px;border:1.5px solid #13202E;border-radius:3px;text-align:center;line-height:11px;font-size:11px}
+.note{background:#FFF4D6;border-radius:6px;padding:7px 10px;font-size:9.5pt;color:#4D3A10;margin:8px 0}
+table.t{width:100%;border-collapse:collapse;margin:8px 0}
+table.t td,table.t th{border:1px solid #C9D2DC;padding:6px 8px;text-align:left;vertical-align:top;font-size:10pt}
+table.t th{background:#F3F5F7}
+table.t td.h{height:24px}
+.foot{margin-top:14px;font-size:8.5pt;color:#7A8796;border-top:1px solid #DFE4EA;padding-top:6px}
+@media print{body{background:#fff}.bar{display:none}.doc{box-shadow:none;margin:0;padding:0;max-width:none}}
+@media screen and (max-width:700px){.doc{padding:16px;margin:8px}.parties,.sign{grid-template-columns:1fr}}
+</style></head>
+<body>
+<div class="bar"><b id="bt">MotorNest documents</b><button onclick="window.print()">Print or save as PDF</button><a href="/#/admin">Back office</a></div>
+<div id="out"></div>
+<script>
+// Fill in once and every document uses it.
+const OP = { name: '', address: '', email: '', phone: '' }; // e.g. name: 'Iconic Ltd, trading as MotorNest'
+const SITE = 'motornest.iconic1.co.uk', VER = 'Version 1.0, November 2026';
+const P = new URLSearchParams(location.search);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const D = { name: P.get('n') || '', addr: P.get('a') || '', phone: P.get('p') || '', email: P.get('e') || '', web: P.get('w') || '', fee: parseInt(P.get('fee') || '', 10) || 0 };
+const LOGO = '<svg viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFC53D"/><stop offset="1" stop-color="#FF7A00"/></linearGradient></defs><rect width="100" height="100" rx="24" fill="url(#g)"/><g transform="translate(57 52) scale(.84) translate(-50 -52)"><g transform="translate(14 0) skewX(-12)"><path d="M24 74V44a13 13 0 0 1 26 0v30M50 44a13 13 0 0 1 26 0v30" fill="none" stroke="#fff" stroke-width="16"/></g></g><g stroke="#0E1B2A" stroke-width="5" stroke-linecap="round" opacity=".85"><path d="M10 49h11"/><path d="M7 60h12"/><path d="M11 71h7"/></g></svg>';
+const f = (label, val) => '<div class="f"><span>' + label + '</span><i>' + esc(val || '') + '</i></div>';
+const opName = () => OP.name || '';
+function dealerBox(title) {
+  return '<div class="box"><b>' + (title || 'The Dealer') + '</b>' + f('Business name', D.name) + f('Registered or trading address', D.addr) + f('', '') +
+    '<div class="parties">' + f('Phone', D.phone) + f('Email for leads', D.email) + '</div>' + f('Company number (if a limited company)', '') + '</div>';
+}
+function opBox() {
+  return '<div class="box"><b>MotorNest</b>' + f('Operated by', OP.name) + f('Address', OP.address) + '<div class="parties">' + f('Phone', OP.phone) + f('Email', OP.email) + '</div></div>';
+}
+function signs(left, right) {
+  const blk = (who, name) => '<div class="box"><b>' + who + '</b>' + f('Name', name) + f('Position', '') + f('Signature', '') + f('Date', '') + '</div>';
+  return '<div class="sign">' + blk(left || 'Signed for the Dealer', '') + blk(right || 'Signed for MotorNest', '') + '</div>';
+}
+const cl = items => '<ol class="cl">' + items.map(x => '<li>' + x + '</li>').join('') + '</ol>';
+const head = (title, lead) => '<div class="head">' + LOGO + '<div class="brand">Motor<span>Nest</span></div><div class="ver">' + VER + '<br>' + SITE + '</div></div><h1>' + title + '</h1>' + (lead ? '<p class="lead">' + lead + '</p>' : '');
+const foot = (t, x) => '<div class="foot">' + t + '. ' + (x || 'Each party keeps a signed copy.') + ' ' + VER + '.</div>';
+
+const DOCS = {
+listing: { t: 'Dealer Listing Agreement', s: 'The main agreement for showing the dealer\'s cars on MotorNest.', b: () =>
+  head('Dealer Listing Agreement', 'This agreement lets the Dealer show its used cars for sale on MotorNest, a website where buyers find cars from local dealers.') +
+  '<div class="parties">' + dealerBox() + opBox() + '</div>' +
+  f('Start date', '') +
+  '<h2>1. What MotorNest does</h2>' + cl([
+    'MotorNest shows the Dealer\'s cars on ' + SITE + ' and sends the Dealer the calls and messages buyers make about them.',
+    'MotorNest is an advertising website. MotorNest does not sell cars, does not own the cars and is not part of any sale. Every sale is between the Dealer and the buyer.',
+    'MotorNest will try to keep the website working and the Dealer\'s stock up to date, but does not promise any number of views, leads or sales, or that the website will never be unavailable.']) +
+  '<h2>2. What the Dealer does</h2>' + cl([
+    'The Dealer is a business that sells used cars to the public, and only lists cars it owns or has the right to sell.',
+    'The Dealer follows the MotorNest Advert Standards Policy and keeps every advert accurate, including price, mileage, history and condition.',
+    'The Dealer removes, or marks as sold, any car that is no longer for sale as soon as possible.',
+    'The Dealer answers buyers promptly and deals with them fairly, and follows consumer law, including the Consumer Rights Act 2015 and the Digital Markets, Competition and Consumers Act 2024.',
+    'If the Dealer offers finance, it does so only with the right Financial Conduct Authority (FCA) permissions.',
+    'The Dealer keeps its portal password private and tells MotorNest straight away if it thinks someone else has used its login.']) +
+  '<h2>3. Fees</h2>' + cl([
+    'Listing is free until MotorNest gives the Dealer at least 30 days\' written notice (email is fine) of a monthly fee.',
+    'The monthly fee agreed today, if any: £__________ per month, starting on ____ / ____ / ________.',
+    'Any fee is invoiced monthly and paid within 14 days. MotorNest may hide the Dealer\'s cars while an invoice is more than 30 days overdue.',
+    'MotorNest may change the fee by giving 30 days\' written notice. The Dealer can end this agreement before the change starts if it does not agree.']) +
+  '<h2>4. Leads and the Dealer\'s information</h2>' + cl([
+    'Buyer enquiries are sent to the email address above and shown in the Dealer\'s portal. The Dealer must keep that email address up to date.',
+    'Both parties look after buyers\' personal information as set out in the MotorNest Data Protection Agreement.',
+    'MotorNest may show the Dealer\'s name, logo, address, phone number, opening hours and cars on the website and in MotorNest advertising.']) +
+  '<h2>5. Responsibility</h2>' + cl([
+    'The Dealer is responsible for its cars, its adverts and its sales, and for any claim from a buyer about them.',
+    'The Dealer will cover MotorNest\'s reasonable costs if a third party makes a claim against MotorNest because an advert was false or the Dealer broke the law.',
+    'MotorNest is not responsible for lost sales or profits. MotorNest\'s total responsibility under this agreement is limited to the fees the Dealer paid in the 12 months before the claim.',
+    'Nothing in this agreement limits responsibility for death or injury caused by negligence, for fraud, or for anything else the law does not allow to be limited.']) +
+  '<h2>6. Ending the agreement</h2>' + cl([
+    'Either party can end this agreement at any time by giving 14 days\' written notice (email is fine).',
+    'MotorNest can hide the Dealer\'s cars straight away, or end this agreement, if the Dealer seriously or repeatedly breaks this agreement or the Advert Standards Policy.',
+    'When the agreement ends, MotorNest removes the Dealer\'s cars from the website within 7 days.']) +
+  '<h2>7. General</h2>' + cl([
+    'This agreement, the Advert Standards Policy, the Stock Feed and Photo Permission, the Data Protection Agreement and (if signed) the Dealer Network Referral Agreement are the whole agreement between the parties.',
+    'Any change must be agreed in writing (email is fine).',
+    'This agreement is governed by the law of England and Wales, and the courts of England and Wales deal with any dispute.']) +
+  signs() + foot('Dealer Listing Agreement') },
+
+feed: { t: 'Stock Feed and Photo Permission', s: 'Lets MotorNest copy the dealer\'s cars and photos automatically.', b: () =>
+  head('Stock Feed and Photo Permission', 'This form gives MotorNest permission to copy the Dealer\'s cars, prices and photos automatically, so the Dealer does not have to type them in twice.') +
+  dealerBox() +
+  '<h2>Where MotorNest may copy the stock from</h2><p>Tick every one that applies:</p>' +
+  '<div class="box"><div class="tk"><b></b> The Dealer\'s own website</div>' + f('Web address', D.web) +
+  '<div class="tk" style="margin-top:6px"><b></b> A stock feed link (for example from MotorDesk, a Facebook or Google sales channel, or a website provider)</div>' + f('Feed link', '') +
+  '<div class="tk" style="margin-top:6px"><b></b> A spreadsheet (CSV file) the Dealer uploads in the MotorNest portal</div></div>' +
+  '<h2>The Dealer confirms that</h2>' + cl([
+    'MotorNest may visit these addresses automatically, normally about once an hour, and copy the details of each car for sale: make, model, price, mileage, specification, description and photos.',
+    'The Dealer owns the photos and descriptions, or has the right to let MotorNest use them. If a website or photo company owns them, the Dealer has its permission.',
+    'MotorNest may store, resize and show the photos and details on MotorNest only to advertise the Dealer\'s cars. MotorNest will not use them to advertise anyone else\'s cars.',
+    'Cars that disappear from the source are taken off MotorNest automatically. The Dealer checks its MotorNest stock from time to time and tells MotorNest about any mistakes.',
+    'The Dealer can stop the automatic copying at any time by telling MotorNest in writing (email is fine). MotorNest then removes the copied cars and photos within 7 days.',
+    'The Dealer will tell MotorNest if its website or feed link changes.']) +
+  signs() + foot('Stock Feed and Photo Permission') },
+
+adverts: { t: 'Advert Standards Policy', s: 'The rules every car advert on MotorNest must follow.', b: () =>
+  head('Advert Standards Policy', 'Every car on MotorNest must meet these standards. They protect buyers and the reputation of every dealer on MotorNest.') +
+  dealerBox() +
+  '<h2>Every advert must</h2>' + cl([
+    '<b>Be a real car that is for sale now.</b> No "bait" adverts for cars that are already sold or do not exist.',
+    '<b>Show the full price.</b> The price shown is the price a buyer pays. Any compulsory extra, such as an admin or preparation fee, must be included in the price shown. Optional extras such as warranties may be offered separately.',
+    '<b>Show the true mileage.</b> If the mileage cannot be confirmed, the advert must say "mileage unverified".',
+    '<b>Say if the car was an insurance write-off</b> (for example Category S or Category N), has been imported, was used as a taxi, rental or police car, or has any other history a buyer would want to know.',
+    '<b>Not have outstanding finance</b> that will not be cleared before the sale.',
+    '<b>Use real photos of the actual car</b>, not stock or brochure pictures, and not photos that hide damage.',
+    '<b>Describe the condition honestly</b>, including known faults and damage. Words like "perfect" or "faultless" must be true.',
+    '<b>Show the correct details</b>: year, make, model, fuel, gearbox and, where the Dealer has it, the MOT expiry date.']) +
+  '<h2>Adverts must never</h2>' + cl([
+    'Be from a private seller, or be a trade car disguised as a private sale.',
+    'Make claims about warranties, finance or "guarantees" that the Dealer cannot back up.',
+    'Pressure buyers with false deadlines, such as "only today" when that is not true.',
+    'Use another business\'s photos, name or logo without permission.']) +
+  '<h2>Finance</h2><p>If an advert mentions finance or monthly payments, the Dealer must have the right FCA permissions and the advert must follow the FCA\'s rules on financial promotions, including a representative example where required.</p>' +
+  '<h2>What MotorNest may do</h2>' + cl([
+    'MotorNest may correct, hide or remove any advert that breaks this policy, and will normally tell the Dealer why.',
+    'Repeated or serious breaks may lead to MotorNest ending the Dealer Listing Agreement.',
+    'MotorNest may update this policy by giving 14 days\' notice. Adverts must then follow the new version.']) +
+  '<p>These standards sit alongside the law, including the Consumer Rights Act 2015, the Digital Markets, Competition and Consumers Act 2024 and the UK advertising codes (CAP Code). The law always comes first.</p>' +
+  '<p style="margin-top:10px"><b>The Dealer has read this policy and agrees to follow it.</b></p>' + signs() + foot('Advert Standards Policy') },
+
+network: { t: 'Dealer Network Referral Agreement', s: 'For dealers who sell each other\'s cars and pay referral fees.', b: () => {
+  const tk = v => '<span class="tk"><b>' + (D.fee === v ? '✓' : '') + '</b> £' + v + '</span>';
+  return head('Dealer Network Referral Agreement', 'The MotorNest Dealer Network lets local dealers sell each other\'s cars. When a dealer has a customer for a car it does not have, it can send that customer to the dealer that has the car. If the sale goes ahead, the selling dealer pays a referral fee.') +
+  dealerBox('The Dealer joining the network') +
+  '<h2>1. The Dealer\'s referral fee</h2><p>The fee this Dealer pays to another dealer who brings it a buyer, for each car sold. Tick one:</p><div class="tickrow">' + [50, 100, 150, 200].map(tk).join('') + '</div>' +
+  '<p>The Dealer can change its fee in the MotorNest portal. A change applies only to requests made after the change. Each request records the fee that applied when it was made.</p>' +
+  '<h2>2. Words used</h2>' + cl([
+    '<b>Referring dealer</b>: the dealer whose customer wants a car the dealer does not have.',
+    '<b>Selling dealer</b>: the dealer that owns the car.',
+    '<b>Request</b>: a request made through the Dealer Network in the MotorNest portal. The portal record (with its date and time) is the proof of which dealer introduced which customer.']) +
+  '<h2>3. How a referral works</h2>' + cl([
+    'The referring dealer sends a request through the MotorNest portal, only after the customer has agreed to their name and phone number being passed on.',
+    'The selling dealer accepts or declines within one working day where it can. Once it accepts, it holds the car for that customer for 48 hours.',
+    'The selling dealer sells the car to the customer in its own name and on its own paperwork. It is the seller for all legal purposes, including the Consumer Rights Act 2015, any warranty, any finance and any complaint or return.',
+    'The referring dealer does not take a deposit or payment for the car, and does not make promises about the car on the selling dealer\'s behalf.',
+    'If the car is moved between sites for a viewing, the dealers agree who pays for the move and who insures the car while it is moved, before it is moved.']) +
+  '<h2>4. The referral fee</h2>' + cl([
+    'If the selling dealer sells the car, or any other car, to the referred customer within 60 days of the request, the selling dealer pays the referring dealer the fee recorded on the request.',
+    'The selling dealer marks the sale in the portal on the day of sale and pays the fee within 7 days, by bank transfer to the account the referring dealer gives on its invoice.',
+    'No fee is due if the customer does not buy, or if the sale is cancelled and the money refunded within 30 days (for example a rejected faulty car). If a fee has already been paid on a sale that is later refunded within 30 days, it is paid back within 7 days.',
+    'Each dealer is responsible for its own tax, including any VAT on the fee.']) +
+  '<h2>5. Fair dealing</h2>' + cl([
+    'A selling dealer never contacts a referred customer to sell to them outside the network, or tells them to come back later, to avoid paying the fee. This applies for 6 months from the request.',
+    'Every dealer treats referred customers as well as its own customers.',
+    'Customer details received through the network are used only for that customer\'s enquiry, and are kept and deleted as set out in the MotorNest Data Protection Agreement.']) +
+  '<h2>6. Disagreements and leaving</h2>' + cl([
+    'The two dealers try to settle any disagreement between themselves first. MotorNest can share the portal records, but is not responsible for any fee and is not a party to any sale.',
+    'A dealer can leave the network at any time in the portal or by telling MotorNest in writing. Fees for sales already agreed are still payable.',
+    'MotorNest may remove a dealer from the network if it does not pay fees on time or breaks this agreement.',
+    'This agreement is governed by the law of England and Wales.']) +
+  signs('Signed for the Dealer', 'Received for MotorNest') + foot('Dealer Network Referral Agreement'); } },
+
+data: { t: 'Data Protection Agreement', s: 'How buyers\' personal details are handled (UK GDPR).', b: () =>
+  head('Data Protection Agreement', 'Buyers give their name, phone number and email when they contact a dealer through MotorNest. This agreement sets out how the Dealer and MotorNest look after that information, as required by the UK GDPR and the Data Protection Act 2018.') +
+  '<div class="parties">' + dealerBox() + opBox() + '</div>' +
+  '<h2>1. Who is responsible</h2>' + cl([
+    'MotorNest and the Dealer are each a separate "controller" of the personal information they hold. Each is responsible for following data protection law for its own use of it.',
+    'MotorNest collects buyer enquiries on its website and passes them to the Dealer the buyer chose. Once the Dealer receives a buyer\'s details, the Dealer is responsible for how it uses them.',
+    'Each party is registered with the Information Commissioner\'s Office (ICO) if the law requires it.']) +
+  '<h2>2. What the Dealer agrees</h2>' + cl([
+    'To use a buyer\'s details only to answer their enquiry and to deal with any purchase that follows.',
+    'Not to send a buyer marketing (for example newsletters or offers) unless the buyer has agreed to it separately.',
+    'Not to sell or pass a buyer\'s details to anyone else, except through the Dealer Network with the buyer\'s agreement, or where the law requires it (for example to a finance company the buyer applies to).',
+    'To keep buyers\' details secure, for example in password-protected systems and not on unlocked phones or shared paper notes.',
+    'To keep a buyer\'s details only as long as needed. If no sale follows, the Dealer deletes them within 12 months of the enquiry. Records of a sale may be kept as long as the law requires.',
+    'To help MotorNest, and MotorNest will help the Dealer, if a buyer asks to see, correct or delete their information.']) +
+  '<h2>3. If something goes wrong</h2>' + cl([
+    'If either party finds that buyer information has been lost, stolen or seen by the wrong person, it tells the other party without delay and within 48 hours where possible, so that any report to the ICO can be made within 72 hours where the law requires.',
+    'Each party is responsible for its own breaches of data protection law.']) +
+  '<h2>4. Dealer Network</h2><p>When a dealer passes a customer\'s details to another dealer through the Dealer Network, the customer must have agreed first (the MotorNest Customer Consent Form can be used for this). The receiving dealer uses the details only for that car enquiry.</p>' +
+  '<h2>5. General</h2><p>This agreement lasts as long as the Dealer Listing Agreement and continues for any buyer information either party still holds after that. It is governed by the law of England and Wales.</p>' +
+  signs() + foot('Data Protection Agreement') },
+
+consent: { t: 'Customer Consent Form', s: 'For a customer to sign before their details go to another dealer.', b: () =>
+  head('Customer Consent Form', 'We don\'t have the car you want in stock, but another local dealer in the MotorNest Dealer Network does. With your permission, we will pass your details to them so they can arrange a viewing.') +
+  '<div class="box"><b>The dealer you are with now</b>' + f('Dealer', D.name) + f('Staff member', '') + '</div>' +
+  '<div class="box"><b>Your details</b>' + f('Full name', '') + '<div class="parties">' + f('Phone', '') + f('Email (optional)', '') + '</div></div>' +
+  '<div class="box"><b>The car you are interested in</b>' + f('Make and model', '') + '<div class="parties">' + f('Registration', '') + f('Price', '') + '</div>' + f('Dealer that has the car', '') + '</div>' +
+  '<h2>What happens to your details</h2><ul>' +
+  '<li>We pass your name, phone number and (if you give it) your email to the dealer that has the car, only about this car.</li>' +
+  '<li>That dealer will contact you about the car. If you buy it, you buy it from that dealer, and your legal rights are with that dealer.</li>' +
+  '<li>We may receive a referral fee from that dealer if you buy the car. This does not change the price you pay.</li>' +
+  '<li>Your details will not be used for marketing unless you agree to it separately.</li>' +
+  '<li>You can change your mind at any time by telling us or the other dealer.</li></ul>' +
+  '<div class="box"><span class="tk"><b></b> I agree that my details can be passed to the dealer named above about this car.</span>' +
+  '<div class="parties" style="margin-top:8px">' + f('Signature', '') + f('Date', '') + '</div></div>' +
+  foot('Customer Consent Form', 'Keep with the customer\'s records.') },
+
+invoice: { t: 'Referral Fee Invoice', s: 'For the referring dealer to bill the selling dealer.', b: () =>
+  head('Referral Fee Invoice', 'MotorNest Dealer Network') +
+  '<div class="parties"><div class="box"><b>From (referring dealer)</b>' + f('Business', D.name) + f('Address', D.addr) + f('', '') + f('VAT number (if registered)', '') + '</div>' +
+  '<div class="box"><b>To (selling dealer)</b>' + f('Business', '') + f('Address', '') + f('', '') + '</div></div>' +
+  '<div class="parties">' + f('Invoice number', '') + f('Invoice date', '') + '</div>' +
+  '<table class="t"><tr><th style="width:60%">Description</th><th>Amount</th></tr>' +
+  '<tr><td>Referral fee, MotorNest Dealer Network.<br>Car: ______________________________<br>Registration: ____________ &nbsp; Date sold: ____ / ____ / ______<br>Customer: ______________________________</td><td class="h"></td></tr>' +
+  '<tr><td>VAT (only if the referring dealer is VAT registered)</td><td class="h"></td></tr><tr><th>Total due</th><th class="h"></th></tr></table>' +
+  '<div class="box"><b>Pay by bank transfer within 7 days</b><div class="parties">' + f('Account name', '') + f('Sort code', '') + '</div>' + f('Account number', '') + f('Payment reference', '') + '</div>' +
+  '<p>When this invoice is paid, mark the request as paid in the Dealer Network tab of the MotorNest portal.</p>' + foot('Referral Fee Invoice', 'Keep a copy for your accounts.') },
+};
+const PACK = ['listing', 'adverts', 'feed', 'data', 'network'];
+const want = P.get('d') || 'pack';
+const list = want === 'pack' ? PACK : want === 'all' ? Object.keys(DOCS) : [want].filter(k => DOCS[k]);
+document.getElementById('out').innerHTML = list.map(k => '<section class="doc">' + DOCS[k].b() + '</section>').join('');
+const t = (want === 'pack' ? 'Dealer sign-up pack' : (DOCS[want] ? DOCS[want].t : 'MotorNest documents')) + (D.name ? ' – ' + D.name : '');
+document.title = t; document.getElementById('bt').textContent = t;
+window.MN_DOCS = Object.keys(DOCS).map(k => ({ k, t: DOCS[k].t, s: DOCS[k].s }));
+if (P.get('print') === '1') setTimeout(() => window.print(), 400);
+</script>
+</body></html>
