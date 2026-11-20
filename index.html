@@ -336,7 +336,7 @@ footer a:hover{color:#fff}
 /* portal + admin (kept simple) */
 .panel{background:var(--card);border-radius:18px;padding:18px;border:1px solid #E6EAEF}
 .grid{display:grid;gap:10px;grid-template-columns:repeat(2,1fr)}
-@media(min-width:760px){.grid{grid-template-columns:repeat(4,1fr)}.grid.g3{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:760px){.grid{grid-template-columns:repeat(4,1fr)}.grid.g3{grid-template-columns:repeat(3,1fr)}.grid.g2{grid-template-columns:repeat(2,1fr)}}
 .tabs{display:flex;gap:6px;overflow-x:auto;margin:14px 0}
 .tab{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:8px 15px;font:inherit;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap;color:var(--ink)}
 .tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
@@ -347,6 +347,19 @@ footer a:hover{color:#fff}
 .row .info b{display:block}
 .row .info small{color:var(--mute)}
 .acts{display:flex;gap:6px;flex-wrap:wrap}
+.netintro{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:#fff;border:1px solid #E6EAEF;border-radius:14px;padding:12px 14px;margin-bottom:12px}
+.netintro b{display:block;font-size:17px}.netintro span{font-size:14px}
+.netsearch{display:grid;grid-template-columns:1fr auto auto;gap:8px;margin-bottom:12px}
+@media(max-width:600px){.netsearch{grid-template-columns:1fr 1fr}.netsearch input{grid-column:1/-1}}
+.earn{color:#1D6B47;font-weight:700;font-size:14px;margin-top:2px}
+.owe{display:inline-block;margin-top:6px;background:#FFF1D6;color:#7A5410;font-weight:800;border-radius:10px;padding:6px 10px}
+.netnote{background:var(--straw-soft);border-radius:10px;padding:8px 10px;margin:6px 0;white-space:pre-wrap;font-size:14px}
+.netrules{margin:4px 0 12px;padding-left:20px;line-height:1.5;font-size:15px}
+.tick{display:flex;gap:10px;align-items:flex-start;font-weight:600;font-size:15px;cursor:pointer;margin:6px 0}
+.tick input{width:22px;height:22px;flex:none;margin-top:1px;appearance:auto;-webkit-appearance:auto;accent-color:#13202E}
+.badge.n-requested{background:var(--straw-soft);color:#7A5410}.badge.n-accepted{background:#E1ECFA;color:#1F4F93}
+.badge.n-sold{background:#FFE3C2;color:#8A4B00}.badge.n-paid{background:#DDF2E7;color:#1D6B47}
+.badge.n-declined,.badge.n-cancelled,.badge.n-not_sold{background:#ECEFF3;color:#4B5873}
 .badge{display:inline-block;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700}
 .badge.live,.badge.approved{background:#DDF2E7;color:#1D6B47}
 .badge.sold,.badge.suspended,.badge.rejected{background:#F8E0DE;color:#9C2E26}
@@ -873,13 +886,13 @@ async function viewPortal() {
       '<form onsubmit="return claimAdmin(event)" style="border-top:1px solid var(--line);padding-top:12px"><label>Site owner setup code</label><input name="code" placeholder="MN-…" required><button class="btn dark" style="margin-top:8px">Unlock admin</button></form></div></div>';
     return;
   }
-  const d = S.dealer, tabs = [['stock', 'Stock'], ['enq', 'Enquiries'], ['csv', 'CSV upload'], ['feed', 'Automatic feed'], ['profile', 'Profile']];
+  const d = S.dealer, tabs = [['stock', 'Stock'], ['enq', 'Enquiries'], ['network', 'Dealer Network'], ['csv', 'CSV upload'], ['feed', 'Automatic feed'], ['profile', 'Profile']];
   app().innerHTML = '<div class="wrap"><div class="portalhead"><div><h2>' + esc(d.name) + ' <span class="badge ' + esc(d.status) + '">' + esc(d.status) + '</span></h2>' +
     (S.managing ? '<span class="muted">Managing as admin · <a href="#/admin" onclick="S.managing=false;S.dealer=S.myDealers[0]||null">back to admin</a></span>' : '') + '</div>' +
     (d.status === 'approved' ? '<a class="btn ghost sm" href="#/dealer/' + esc(d.slug) + '">View public page</a>' : '') + '</div>' +
     (d.status !== 'approved' ? '<div class="note">This dealership is <b>' + esc(d.status) + '</b>. Cars will not show on MotorNest until it is approved.</div>' : '') +
     '<div class="tabs">' + tabs.map(t => '<button class="tab' + (S.tab === t[0] ? ' on' : '') + '" onclick="S.tab=\'' + t[0] + '\';viewPortal()">' + t[1] + '</button>').join('') + '</div><div id="tab"><div class="center">Loading…</div></div></div>';
-  try { await ({ stock: tabStock, enq: tabEnq, csv: tabCsv, feed: tabFeed, profile: tabProfile }[S.tab] || tabStock)(); } catch (e) { fail(e); }
+  try { await ({ stock: tabStock, enq: tabEnq, network: tabNetwork, csv: tabCsv, feed: tabFeed, profile: tabProfile }[S.tab] || tabStock)(); } catch (e) { fail(e); }
 }
 async function dealerCars() {
   const { data, error } = await sb.from('cars').select('*,photos:car_photos!car_photos_car_id_fkey(id,path,sort_order)').eq('dealer_id', S.dealer.id).order('created_at', { ascending: false });
@@ -984,6 +997,148 @@ function enqRow(q) {
     '<div class="acts"><select onchange="enqStatus(\'' + q.id + '\',this.value)" style="width:auto">' + ['new', 'contacted', 'closed'].map(s => '<option' + (q.status === s ? ' selected' : '') + '>' + s + '</option>').join('') + '</select></div></div>';
 }
 async function enqStatus(id, st) { const { error } = await sb.from('enquiries').update({ status: st }).eq('id', id); if (error) return fail(error); toast('Updated'); }
+
+// ---------- Dealer Network (dealers selling each other's cars) ----------
+const NET_FEES = [50, 100, 150, 200];
+const NET_ST = { requested: 'Waiting for answer', accepted: 'Accepted, car held', declined: 'Declined', cancelled: 'Cancelled', sold: 'Sold, fee due', not_sold: 'Not sold', paid: 'Fee paid' };
+const NET_RULES = ['If another dealer brings you a buyer and you sell them the car, you pay that dealer your referral fee within 7 days.',
+  'When you accept a request, you hold the car for that customer for 48 hours.',
+  'You never contact another dealer\'s customer to cut them out of the fee.',
+  'You only send a customer\'s details when the customer has agreed.',
+  'The dealer who owns the car sells it in their own name and looks after the paperwork, warranty and any problems.'];
+async function tabNetwork() {
+  S.view = 'portal'; const id = S.dealer.id;
+  const [dl, rq] = await Promise.all([sb.rpc('network_dealers', { p_dealer: id }), sb.rpc('network_list', { p_dealer: id })]);
+  if (dl.error) throw dl.error; if (rq.error) throw rq.error;
+  S.net = { dealers: dl.data || [], reqs: rq.data || [] };
+  S.net.me = S.net.dealers.find(d => d.dealer_id === id);
+  if (!S.net.me) return netJoin();
+  const R = S.net.reqs, inn = R.filter(r => r.dir === 'in'), out = R.filter(r => r.dir === 'out');
+  const waiting = inn.filter(r => r.status === 'requested').length, open = out.filter(r => r.status === 'requested' || r.status === 'accepted').length;
+  const owedToMe = out.filter(r => r.status === 'sold').reduce((s, r) => s + r.fee, 0), iOwe = inn.filter(r => r.status === 'sold').reduce((s, r) => s + r.fee, 0);
+  if (!S.ntab) S.ntab = waiting ? 'in' : 'find';
+  const others = S.net.dealers.filter(d => d.dealer_id !== id);
+  $('#tab').innerHTML = '<div class="netintro"><div><b>Dealer Network</b><span class="muted">' + others.length + ' other dealer' + (others.length === 1 ? '' : 's') + ' in the network. Your referral fee: <b>' + money(S.net.me.fee) + '</b></span></div>' +
+    '<div class="acts"><button class="btn ghost sm" onclick="netJoin(true)">Change fee</button><button class="btn ghost sm" onclick="netLeave()">Leave</button></div></div>' +
+    '<div class="kpis" style="margin-bottom:12px"><div class="kpi"><b>' + waiting + '</b><span>Waiting for you</span><small>requests for your cars</small></div><div class="kpi"><b>' + open + '</b><span>Your open requests</span><small>for your customers</small></div>' +
+    '<div class="kpi"><b>' + money(owedToMe) + '</b><span>Owed to you</span><small>fees from sold cars</small></div><div class="kpi"><b>' + money(iOwe) + '</b><span>You owe</span><small>fees to other dealers</small></div></div>' +
+    '<div class="lperiod">' + [['find', 'Find a car for my customer'], ['in', 'Requests for my cars' + (waiting ? ' (' + waiting + ')' : '')], ['out', 'My requests' + (out.length ? ' (' + out.length + ')' : '')]].map(t => '<button class="chip' + (S.ntab === t[0] ? ' on' : '') + '" onclick="S.ntab=\'' + t[0] + '\';tabNetwork()">' + t[1] + '</button>').join('') + '</div><div id="ntab"></div>';
+  if (S.ntab === 'find') return netFind();
+  const list = S.ntab === 'in' ? inn : out;
+  $('#ntab').innerHTML = list.length ? list.map(netRow).join('') : '<div class="center">' + (S.ntab === 'in' ? 'No requests for your cars yet. When another dealer has a buyer for one of your cars, it shows here and you get an email.' : 'You have not requested any cars yet. Use "Find a car for my customer" when a customer wants something you don\'t have.') + '</div>';
+}
+function netJoin(change) {
+  const cur = S.net && S.net.me ? S.net.me.fee : 100, ok = S.dealer.status === 'approved';
+  S.nfee = S.nfee || cur;
+  $('#tab').innerHTML = '<div class="panel" style="max-width:640px"><h3 style="margin:0 0 6px">' + (change ? 'Change your referral fee' : 'Join the Dealer Network') + '</h3>' +
+    (change ? '' : '<p style="margin:0 0 10px">Sell more cars together with other Sheffield dealers. When a customer wants a car you don\'t have, find it at another dealer and send them your customer. If they sell it, they pay you a referral fee. It works the other way round too.</p>') +
+    '<label>Your referral fee</label><p class="muted" style="margin:2px 0 8px;font-size:14px">What you pay another dealer when they bring you a buyer and you sell them one of your cars. Every dealer chooses their own.</p>' +
+    '<div class="lperiod">' + NET_FEES.map(f => '<button type="button" class="chip' + (S.nfee === f ? ' on' : '') + '" onclick="S.nfee=' + f + ';netJoin(' + (change ? 'true' : 'false') + ')">' + money(f) + '</button>').join('') + '</div>' +
+    (change ? '' : '<label style="margin-top:6px">The rules</label><ul class="netrules">' + NET_RULES.map(r => '<li>' + esc(r) + '</li>').join('') + '</ul>' +
+      '<label class="tick"><input type="checkbox" id="netagree"> I agree to the Dealer Network rules for ' + esc(S.dealer.name) + '</label>') +
+    (ok ? '' : '<div class="note">Your dealership must be approved before it can join.</div>') +
+    '<div class="acts" style="margin-top:12px"><button class="btn" ' + (ok ? '' : 'disabled ') + 'onclick="netSaveFee(' + (change ? 'true' : 'false') + ')">' + (change ? 'Save fee' : 'Join with a ' + money(S.nfee) + ' fee') + '</button>' + (change ? '<button class="btn ghost" onclick="tabNetwork()">Cancel</button>' : '') + '</div><div class="err" id="neterr"></div>' +
+    (change ? '<p class="muted" style="font-size:13px;margin-bottom:0">A new fee only applies to new requests. Requests already made keep the fee they were made with.</p>' : '') + '</div>';
+}
+async function netSaveFee(change) {
+  if (!change && !$('#netagree').checked) { $('#neterr').textContent = 'Tick the box to agree to the rules first.'; return; }
+  const { error } = await sb.rpc('network_join', { p_dealer: S.dealer.id, p_fee: S.nfee });
+  if (error) { $('#neterr').textContent = error.message; return; }
+  S.nfee = null; toast(change ? 'Referral fee saved' : 'You are in the Dealer Network'); S.ntab = 'find'; tabNetwork();
+}
+async function netLeave() {
+  if (!confirm('Leave the Dealer Network? Other dealers will no longer be able to request your cars, and you will not be able to request theirs. Requests already made stay in your list.')) return;
+  const { error } = await sb.rpc('network_leave', { p_dealer: S.dealer.id }); if (error) return fail(error);
+  toast('You left the Dealer Network'); tabNetwork();
+}
+function netFind() {
+  $('#ntab').innerHTML = '<form class="netsearch" onsubmit="return netSearch(event)"><input name="q" placeholder="Make or model, e.g. Audi A1" value="' + esc(S.nq || '') + '" autocomplete="off">' +
+    '<select name="max">' + opts([5000, 10000, 15000, 20000, 30000, 50000, 100000].map(n => money(n)), S.nmax ? money(S.nmax) : '', 'Any price') + '</select><button class="btn">Search</button></form><div id="nres"></div>';
+  netSearch();
+}
+async function netSearch(e) {
+  if (e) { e.preventDefault(); S.nq = e.target.q.value.trim(); S.nmax = parseInt(String(e.target.max.value).replace(/[^0-9]/g, ''), 10) || null; }
+  const others = S.net.dealers.filter(d => d.dealer_id !== S.dealer.id), box = $('#nres');
+  if (!others.length) { box.innerHTML = '<div class="center">No other dealers have joined yet. As soon as they do, their cars show here.</div>'; return false; }
+  box.innerHTML = '<div class="center">Searching…</div>';
+  let q = sb.from('cars').select('id,make,model,variant,year,price,mileage,fuel,gearbox,reg,dealer_id,photos:car_photos!car_photos_car_id_fkey(path,sort_order)').in('dealer_id', others.map(d => d.dealer_id)).eq('status', 'live');
+  String(S.nq || '').toLowerCase().replace(/[^a-z0-9 \-]/g, ' ').split(/\s+/).filter(Boolean).slice(0, 4).forEach(w => { q = q.or('make.ilike.%' + w + '%,model.ilike.%' + w + '%,variant.ilike.%' + w + '%'); });
+  if (S.nmax) q = q.lte('price', S.nmax);
+  const { data, error } = await q.order('price', { ascending: true }).limit(60);
+  if (error) { box.innerHTML = ''; fail(error); return false; }
+  data.forEach(c => c.photos.sort((a, b) => a.sort_order - b.sort_order));
+  S.nres = data;
+  const by = {}; others.forEach(d => by[d.dealer_id] = d);
+  const mine = new Set(S.net.reqs.filter(r => r.dir === 'out' && (r.status === 'requested' || r.status === 'accepted')).map(r => r.car_id));
+  box.innerHTML = data.length ? '<p class="muted" style="margin:0 0 8px">' + data.length + (data.length === 60 ? '+' : '') + ' cars from other dealers' + (S.nq ? ' matching "' + esc(S.nq) + '"' : '') + ', cheapest first.</p>' + data.map(c => {
+    const d = by[c.dealer_id] || {};
+    return '<div class="row">' + img(c) + '<div class="info"><b>' + esc(title(c)) + '</b><small>' + esc([c.variant, c.mileage != null ? num(c.mileage) + ' miles' : '', c.fuel, c.gearbox].filter(Boolean).join(' · ')) + '</small>' +
+      '<div><b style="display:inline">' + money(c.price) + '</b> <small>at ' + esc(d.name || '') + '</small></div><div class="earn">You earn ' + money(d.fee) + ' if they sell it to your customer</div></div>' +
+      '<div class="acts">' + (mine.has(c.id) ? '<span class="badge n-requested">Already requested</span>' : '<button class="btn sm" onclick="netAsk(\'' + c.id + '\')">Request for my customer</button>') + '<a class="btn ghost sm" href="#/car/' + c.id + '" target="_blank" rel="noopener">View</a></div></div>';
+  }).join('') : '<div class="center">No cars found' + (S.nq ? ' for "' + esc(S.nq) + '"' : '') + '. Try fewer words or a higher price.</div>';
+  return false;
+}
+function netAsk(carId) {
+  const c = S.nres.find(x => x.id === carId), d = S.net.dealers.find(x => x.dealer_id === c.dealer_id);
+  $('#ntab').innerHTML = '<form class="panel" style="max-width:640px" onsubmit="return netSend(event,\'' + carId + '\')"><h3 style="margin:0 0 10px">Request this car for your customer</h3>' +
+    '<div class="row" style="margin:0 0 12px">' + img(c) + '<div class="info"><b>' + esc(title(c)) + '</b><small>' + esc(c.variant || '') + (c.reg ? ' · ' + esc(c.reg) : '') + '</small><div><b style="display:inline">' + money(c.price) + '</b> <small>at ' + esc(d.name) + '</small></div></div></div>' +
+    '<div class="grid g2"><div><label>Customer name *</label><input name="name" required maxlength="120" autocomplete="off"></div><div><label>Customer phone *</label><input name="phone" type="tel" required minlength="5" maxlength="40" autocomplete="off"></div></div>' +
+    '<div style="margin-top:10px"><label>Customer email</label><input name="email" type="email" maxlength="200" autocomplete="off"></div>' +
+    '<div style="margin-top:10px"><label>Note for ' + esc(d.name) + '</label><textarea name="note" maxlength="1000" placeholder="E.g. wants to view on Saturday, has a part exchange, paying cash or finance"></textarea></div>' +
+    '<label class="tick" style="margin-top:12px"><input type="checkbox" name="consent" required> The customer agreed that we can pass their name and phone number to ' + esc(d.name) + ' about this car.</label>' +
+    '<div class="note">If ' + esc(d.name) + ' sells this car to your customer, they pay you <b>' + money(d.fee) + '</b>. They see your customer\'s details once they accept.</div>' +
+    '<div class="acts"><button class="btn" id="nsend">Send request</button><button type="button" class="btn ghost" onclick="tabNetwork()">Back</button></div><div class="err" id="neterr"></div></form>';
+  window.scrollTo(0, 0);
+}
+async function netSend(e, carId) {
+  e.preventDefault(); const f = e.target, b = $('#nsend'); b.disabled = true;
+  const { error } = await sb.rpc('network_request', { p_from: S.dealer.id, p_car: carId, p_name: f.name.value.trim(), p_phone: f.phone.value.trim(), p_email: f.email.value.trim() || null, p_note: f.note.value.trim() || null, p_consent: f.consent.checked });
+  if (error) { $('#neterr').textContent = error.message; b.disabled = false; return false; }
+  toast('Request sent. They have been emailed.'); S.ntab = 'out'; tabNetwork(); return false;
+}
+function netRow(r) {
+  const c = r.car || {}, t = [c.year, c.make, c.model].filter(Boolean).join(' '), when = d => d ? new Date(d).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : '';
+  const other = r.dir === 'in' ? r.from_dealer : r.to_dealer, tel = p => p ? '<a href="tel:' + esc(p.replace(/[^0-9+]/g, '')) + '">' + esc(p) + '</a>' : '';
+  const who = r.dir === 'all' ? esc(r.from_dealer.name) + ' → ' + esc(r.to_dealer.name) : (r.dir === 'in' ? 'From ' : 'To ') + '<b style="display:inline">' + esc(other.name) + '</b>' + (other.phone && r.status !== 'requested' || r.dir === 'out' ? ' ' + tel(other.phone) : '');
+  let acts = '', info = '';
+  if (r.dir === 'in') {
+    if (r.status === 'requested') acts = '<button class="btn sm" onclick="netDo(\'' + r.id + '\',\'accept\')">Accept and hold 48h</button><button class="btn ghost sm" onclick="netDo(\'' + r.id + '\',\'decline\')">Decline</button>';
+    if (r.status === 'accepted') acts = '<button class="btn sm" onclick="netDo(\'' + r.id + '\',\'sold\')">Sold to this customer</button><button class="btn ghost sm" onclick="netDo(\'' + r.id + '\',\'not_sold\')">Didn\'t buy</button>';
+    if (r.status === 'sold') info = '<div class="owe">You owe ' + esc(r.from_dealer.name) + ' ' + money(r.fee) + '</div>';
+  } else if (r.dir === 'out') {
+    if (r.status === 'requested' || r.status === 'accepted') acts = '<button class="btn ghost sm" onclick="netDo(\'' + r.id + '\',\'cancel\')">Cancel request</button>';
+    if (r.status === 'sold') { info = '<div class="owe">' + esc(r.to_dealer.name) + ' owes you ' + money(r.fee) + '</div>'; acts = '<button class="btn sm" onclick="netDo(\'' + r.id + '\',\'paid\')">I\'ve been paid</button>'; }
+  }
+  const cust = r.customer_phone ? esc(r.customer_name) + ' ' + tel(r.customer_phone) + (r.customer_email ? ' <a href="mailto:' + esc(r.customer_email) + '">' + esc(r.customer_email) + '</a>' : '') : esc(r.customer_name) + ' <small>(details shown when you accept)</small>';
+  return '<div class="row">' + (r.photo ? '<div class="pic"><img loading="lazy" alt="" src="' + esc(photoUrl(r.photo)) + '"></div>' : '<div class="ph">No photo</div>') +
+    '<div class="info"><b>' + esc(t) + ' <span class="badge n-' + esc(r.status) + '">' + esc(NET_ST[r.status] || r.status) + '</span></b><small>' + esc(c.variant || '') + (c.reg ? ' · ' + esc(c.reg) : '') + ' · ' + money(c.price) + ' · fee ' + money(r.fee) + '</small>' +
+    '<div style="margin-top:3px">' + who + '</div><div>Customer: ' + cust + '</div>' + (r.note ? '<div class="netnote">' + esc(r.note) + '</div>' : '') +
+    (r.status === 'accepted' && r.hold_until ? '<small>Held until ' + when(r.hold_until) + '</small><br>' : '') + (r.reason ? '<small>Reason: ' + esc(r.reason) + '</small><br>' : '') +
+    '<small>Requested ' + when(r.created_at) + (r.sold_at ? ' · sold ' + when(r.sold_at) : '') + (r.paid_at ? ' · paid ' + when(r.paid_at) : '') + '</small>' + info + '</div>' +
+    (acts ? '<div class="acts">' + acts + '</div>' : '') + '</div>';
+}
+async function netDo(id, action) {
+  const q = { decline: 'Why can\'t you do this one? (optional, e.g. already sold, deposit taken)', not_sold: 'What happened? (optional)', cancel: 'Why are you cancelling? (optional)' }[action];
+  const sure = { accept: 'Accept this request and hold the car for 48 hours?', sold: 'Confirm you sold this car to this customer? The car will be marked sold and you will owe the referral fee.', paid: 'Confirm you have received the referral fee?' }[action];
+  let reason = null;
+  if (q) { reason = prompt(q, ''); if (reason === null) return; }
+  else if (sure && !confirm(sure)) return;
+  const { error } = await sb.rpc('network_update', { p_id: id, p_action: action, p_reason: reason ? reason.slice(0, 500) : null });
+  if (error) return fail(error);
+  if (action === 'sold') S.cars = null;
+  toast({ accept: 'Accepted. They have been emailed.', decline: 'Declined', sold: 'Marked as sold', not_sold: 'Updated', cancel: 'Request cancelled', paid: 'Marked as paid' }[action]);
+  S.view === 'admin' ? adNet() : tabNetwork();
+}
+async function adNet() {
+  S.view = 'admin';
+  const [rq, mem] = await Promise.all([sb.rpc('network_list', { p_dealer: null }), sb.from('dealer_network').select('fee,joined_at,dealer:dealers!dealer_network_dealer_id_fkey(name)').order('joined_at')]);
+  if (rq.error) throw rq.error; if (mem.error) throw mem.error;
+  const R = rq.data || [], sold = R.filter(r => r.status === 'sold' || r.status === 'paid');
+  $('#tab').innerHTML = '<div class="kpis" style="margin-bottom:12px"><div class="kpi"><b>' + mem.data.length + '</b><span>Dealers joined</span><small>Dealer Network</small></div><div class="kpi"><b>' + R.length + '</b><span>Requests</span><small>all time</small></div>' +
+    '<div class="kpi"><b>' + sold.length + '</b><span>Cars sold</span><small>through the network</small></div><div class="kpi"><b>' + money(sold.reduce((s, r) => s + r.fee, 0)) + '</b><span>Fees between dealers</span><small>' + money(R.filter(r => r.status === 'sold').reduce((s, r) => s + r.fee, 0)) + ' still unpaid</small></div></div>' +
+    '<h3 style="margin:14px 0 8px">Dealers in the network</h3>' + (mem.data.length ? mem.data.map(m => '<div class="row"><div class="info"><b>' + esc(m.dealer ? m.dealer.name : '') + '</b><small>Joined ' + new Date(m.joined_at).toLocaleDateString('en-GB') + '</small></div><b>' + money(m.fee) + ' fee</b></div>').join('') : '<div class="center" style="padding:20px">No dealers have joined yet. Each dealer joins from the Dealer Network tab in their portal.</div>') +
+    '<h3 style="margin:14px 0 8px">Requests</h3>' + (R.length ? R.map(netRow).join('') : '<div class="center" style="padding:20px">No requests yet.</div>');
+}
 
 // ----- CSV stock upload -----
 const CSV_COLS = ['reg', 'make', 'model', 'variant', 'year', 'price', 'mileage', 'fuel', 'gearbox', 'body_type', 'colour', 'engine_cc', 'doors', 'seats', 'owners', 'mot_expiry', 'description'];
@@ -1111,7 +1266,7 @@ async function saveProfile(e) {
 }
 
 // ---------- back office (site owner) ----------
-const BO_TABS = [['home', 'Overview'], ['leads', 'Leads'], ['dealers', 'Dealerships'], ['apps', 'Applications'], ['cars', 'All cars'], ['enq', 'Enquiries']];
+const BO_TABS = [['home', 'Overview'], ['leads', 'Leads'], ['net', 'Dealer Network'], ['dealers', 'Dealerships'], ['apps', 'Applications'], ['cars', 'All cars'], ['enq', 'Enquiries']];
 async function viewAdmin() {
   if (!S.user) { location.hash = '#/portal'; return; }
   if (!S.isAdmin) { app().innerHTML = '<div class="wrap"><div class="center">Back office is for the site owner only.</div></div>'; return; }
@@ -1119,7 +1274,7 @@ async function viewAdmin() {
   app().innerHTML = '<div class="wrap"><div class="portalhead"><h2>Back office</h2><span class="muted">Every dealership on MotorNest, in one place</span></div><div class="tabs">' +
     BO_TABS.map(t => '<button class="tab' + (S.atab === t[0] ? ' on' : '') + '" onclick="S.atab=\'' + t[0] + '\';viewAdmin()">' + t[1] + '</button>').join('') +
     '</div><div id="tab"><div class="center">Loading…</div></div></div>';
-  try { await ({ home: boHome, leads: adLeads, dealers: adDealers, apps: adApps, cars: adCars, enq: adEnq }[S.atab])(); } catch (e) { fail(e); }
+  try { await ({ home: boHome, leads: adLeads, net: adNet, dealers: adDealers, apps: adApps, cars: adCars, enq: adEnq }[S.atab])(); } catch (e) { fail(e); }
 }
 const gbp = n => '£' + Number(n || 0).toLocaleString('en-GB', { minimumFractionDigits: Number(n) % 1 ? 2 : 0, maximumFractionDigits: 2 });
 function since(t) {
@@ -1427,7 +1582,7 @@ function route() {
   if (p === 'privacy' || p === 'terms') return viewLegal(p);
   if (p === 'alerts') return viewAlertMsg(a);
   if (p === 'app') return viewApp();
-  if (p === 'portal') return viewPortal();
+  if (p === 'portal') { if (a) S.tab = a; return viewPortal(); }
   if (p === 'admin') return viewAdmin();
   return viewHome();
 }
